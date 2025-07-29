@@ -1,0 +1,420 @@
+@import 'tailwindcss';
+
+@theme {
+  /* Color palette */
+  /* Primary colors - Brand/Main */
+  --color-primary-100: #d8effd;
+  --color-primary-300: #8bd0f9;
+  --color-primary-500: #3db1f5;
+  --color-primary-700: #0972ae;
+  --color-primary-900: #064c74;
+
+  /* Neutral Colors - Grayscale */
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-300: #d6d6d6;
+  --color-neutral-500: #858585;
+  --color-neutral-700: #292929;
+  --color-neutral-900: #141414;
+
+  /* Error colors - Alerts/Errors */
+  --color-error-100: #ff5c61;
+  --color-error-300: #ff333a;
+  --color-error-500: #ff0a12;
+  --color-error-700: #cc0007;
+  --color-error-900: #a30005;
+
+  /* Success colors - Confirmations */
+  --color-success-100: #b0e364;
+  --color-success-300: #95d930;
+  --color-success-500: #689b1c;
+  --color-success-700: #517916;
+  --color-success-900: #3a5610;
+
+  /* Warning colors - Cautions */
+  --color-warning-100: #ffd970;
+  --color-warning-300: #ffce47;
+  --color-warning-500: #ffc31f;
+  --color-warning-700: #f5b400;
+  --color-warning-900: #b88700;
+
+  /* Info colors - Notifications */
+  --color-info-100: #cfd6dd;
+  --color-info-300: #a0acbb;
+  --color-info-500: #708399;
+  --color-info-700: #4c5a6b;
+  --color-info-900: #333c48;
+
+  /* Typography */
+  /* Font families */
+  --font-heading: var(--font-dm-sans), sans-serif;
+  --font-body: var(--font-inter), sans-serif;
+  --font-mono: var(--font-jetbrains-mono), monospace;
+
+  /* Font sizes - Text hierarchy */
+  --text-h1: 3rem;
+  --text-h2: 2.5rem;
+  --text-h3: 2.0625rem;
+  --text-h4: 1.75rem;
+  --text-h5: 1.4375rem;
+  --text-h6: 1.1875rem;
+  --text-large: 1.1875rem;
+  --text-base: 1rem;
+  --text-small: 0.8125rem;
+  --text-button: 1rem;
+
+  /* Font weights - Text emphasis */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line heights - Vertical rhythm */
+  --leading-h1: 3rem;
+  --leading-h2: 2.5rem;
+  --leading-h3: 2.0625rem;
+  --leading-h4: 1.75rem;
+  --leading-h5: 1.4375rem;
+  --leading-h6: 1.1875rem;
+  --leading-large: 1.8125rem;
+  --leading-base: 1.5rem;
+  --leading-small: 1.25rem;
+  --leading-button: 1.5rem;
+
+  /* Letter spacing - Text readability */
+  --tracking-h1: -0.036rem;
+  --tracking-h2: -0.03rem;
+  --tracking-h3: -0.02475rem;
+  --tracking-h4: -0.021rem;
+  --tracking-h5: -0.01725rem;
+  --tracking-h6: -0.01425rem;
+  --tracking-large: -0.016625rem;
+  --tracking-base: -0.014rem;
+  --tracking-small: -0.011375rem;
+  --tracking-button: -0.014rem;
+
+  /* Spacing - Layout gaps */
+  --spacing-4xs: 0.0625rem;
+  --spacing-3xs: 0.125rem;
+  --spacing-2xs: 0.25rem;
+  --spacing-xs: 0.375rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 0.75rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1.25rem;
+  --spacing-2xl: 1.5rem;
+  --spacing-3xl: 2rem;
+  --spacing-4xl: 2.5rem;
+
+  /* Border Radius - Corner rounding */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-full: calc(infinity * 1px);
+
+  /* Shadows - Elevation effects */
+  --shadow-4xs: 0 0.0625rem 0.125rem 0 rgba(0, 0, 0, 0.15);
+  --shadow-3xs: 0 0.125rem 0.25rem 0 rgba(0, 0, 0, 0.15);
+  --shadow-2xs: 0 0.1875rem 0.375rem 0 rgba(0, 0, 0, 0.15);
+  --shadow-xs: 0 0.25rem 0.5rem 0 rgba(0, 0, 0, 0.15);
+  --shadow-sm: 0 0.3125rem 0.625rem 0 rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 0.375rem 0.75rem 0 rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 0.4rem 0.8rem 0 rgba(0, 0, 0, 0.15);
+  --shadow-xl: 0 0.4375rem 0.875rem 0 rgba(0, 0, 0, 0.15);
+  --shadow-2xl: 0 0.5rem 1rem 0 rgba(0, 0, 0, 0.15);
+  --shadow-3xl: 0 0.5625rem 1.125rem 0 rgba(0, 0, 0, 0.15);
+  --shadow-4xl: 0 0.625rem 1.25rem 0 rgba(0, 0, 0, 0.15);
+}
+
+@layer base {
+  /* Global defaults */
+  * {
+    @apply !scroll-smooth;
+    @apply !scroll-pt-16;
+    @apply !box-border;
+  }
+
+  /* Responsive text */
+  html {
+    @apply text-[100%] md:text-[112.5%] lg:text-[125%];
+  }
+
+  /* Body defaults */
+  body {
+    @apply font-body;
+    @apply text-base;
+    @apply leading-base;
+    @apply tracking-base;
+    @apply text-neutral-900 dark:text-neutral-100;
+    @apply bg-neutral-100 dark:bg-neutral-900;
+  }
+
+  /* Heading styles */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading;
+    @apply font-semibold;
+    @apply mb-xs;
+  }
+
+  h1 {
+    @apply text-h1;
+    @apply leading-h1;
+    @apply tracking-h1;
+  }
+
+  h2 {
+    @apply text-h2;
+    @apply leading-h2;
+    @apply tracking-h2;
+  }
+
+  h3 {
+    @apply text-h3;
+    @apply leading-h3;
+    @apply tracking-h3;
+  }
+
+  h4 {
+    @apply text-h4;
+    @apply leading-h4;
+    @apply tracking-h4;
+  }
+
+  h5 {
+    @apply text-h5;
+    @apply leading-h5;
+    @apply tracking-h5;
+  }
+
+  h6 {
+    @apply text-h6;
+    @apply leading-h6;
+    @apply tracking-h6;
+  }
+
+  p {
+    @apply mb-2xs;
+  }
+
+  /* Link styling */
+  a {
+    @apply text-primary-700 dark:text-primary-500;
+    @apply transition-colors duration-200 ease-in-out;
+
+    &:hover {
+      @apply text-primary-900 dark:text-primary-700;
+      @apply underline;
+    }
+  }
+
+  /* List formatting */
+  ul,
+  ol {
+    @apply mb-xs list-none;
+  }
+
+  li {
+    @apply mb-2xs;
+  }
+
+  /* Code blocks */
+  pre,
+  code {
+    @apply font-mono;
+    @apply text-small;
+    @apply bg-neutral-300 dark:bg-neutral-700;
+    @apply rounded-md;
+  }
+
+  code {
+    @apply px-2xs;
+    @apply py-3xs;
+  }
+
+  pre {
+    @apply p-md;
+    @apply mb-2xs;
+    @apply overflow-x-auto;
+
+    code {
+      @apply p-0;
+      @apply bg-transparent;
+    }
+  }
+
+  /* Form elements */
+  input,
+  select,
+  textarea,
+  button {
+    @apply font-body;
+  }
+
+  /* Input fields */
+  input,
+  textarea,
+  select {
+    @apply w-full;
+    @apply p-2xs;
+    @apply border border-neutral-300 dark:border-neutral-700;
+    @apply rounded-md;
+    @apply bg-neutral-100 dark:bg-neutral-900;
+    @apply text-neutral-900 dark:text-neutral-100;
+    @apply outline-none;
+    @apply transition duration-200 ease-in-out;
+
+    &:focus {
+      @apply border-primary-700;
+    }
+
+    &:disabled {
+      @apply bg-neutral-300 dark:bg-neutral-700 opacity-50;
+      @apply cursor-not-allowed;
+    }
+  }
+
+  /* Button styles */
+  button,
+  .button {
+    @apply inline-block;
+    @apply px-xs;
+    @apply py-2xs;
+    @apply font-semibold;
+    @apply text-button;
+    @apply leading-button;
+    @apply tracking-button;
+    @apply rounded-md;
+    @apply transition duration-200 ease-in-out;
+    @apply cursor-pointer;
+    @apply text-center;
+
+    &.primary {
+      @apply bg-primary-700;
+      @apply text-neutral-100;
+
+      &:hover {
+        @apply bg-primary-900;
+      }
+    }
+
+    &:disabled {
+      @apply opacity-50;
+      @apply cursor-not-allowed;
+    }
+  }
+
+  /* Table styling */
+  table {
+    @apply w-full;
+    @apply mb-xs;
+    @apply border-collapse;
+  }
+
+  th,
+  td {
+    @apply border-b border-neutral-300 dark:border-neutral-700;
+    @apply p-2xs;
+    @apply text-left;
+  }
+
+  th {
+    @apply font-semibold;
+    @apply bg-neutral-300 dark:bg-neutral-700;
+  }
+
+  /* Other elements */
+  hr {
+    @apply border-t border-neutral-300 dark:border-neutral-700;
+    @apply my-2xs;
+  }
+
+  blockquote {
+    @apply pl-sm;
+    @apply border-l-4 border-b-neutral-300 dark:border-neutral-700;
+    @apply my-xs;
+    @apply italic;
+  }
+
+  /* Accessibility */
+  :focus-visible {
+    @apply outline-none;
+    @apply ring-2 ring-primary-700;
+    @apply ring-offset-2;
+  }
+
+  /* Status indicators */
+  .text-error {
+    @apply text-error-700 dark:text-error-300;
+  }
+
+  .text-success {
+    @apply text-success-700 dark:text-success-300;
+  }
+
+  .text-warning {
+    @apply text-warning-700 dark:text-warning-300;
+  }
+
+  .text-info {
+    @apply text-info-700 dark:text-info-300;
+  }
+
+  /* Text size helpers */
+  .text-large {
+    @apply text-large;
+    @apply leading-large;
+    @apply tracking-large;
+  }
+
+  .text-small {
+    @apply text-small;
+    @apply leading-small;
+    @apply tracking-small;
+  }
+}
+
+@layer utilities {
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
+
+  .flex-between {
+    @apply flex items-center justify-between;
+  }
+
+  .flex-around {
+    @apply flex items-center justify-around;
+  }
+
+  .flex-col-center {
+    @apply flex flex-col items-center justify-center;
+  }
+
+  .flex-col-start {
+    @apply flex flex-col items-start justify-start;
+  }
+
+  .flex-col-between {
+    @apply flex flex-col justify-between;
+  }
+
+  .grid-center {
+    @apply grid place-items-center;
+  }
+
+  .truncate-text {
+    @apply whitespace-nowrap overflow-hidden text-ellipsis;
+  }
+
+  .line-clamp-2 {
+    @apply overflow-hidden line-clamp-2;
+  }
+
+  .line-clamp-3 {
+    @apply overflow-hidden line-clamp-3;
+  }
+}
