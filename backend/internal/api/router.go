@@ -31,16 +31,16 @@
 // for use in your HTTP server.
 //
 // Example:
-//   router := api.Router()
-//   http.ListenAndServe(":8080", router)
 //
+//	router := api.Router()
+//	http.ListenAndServe(":8080", router)
 package api
 
 import (
 	"time"
 
-	// "github.com/egeuysall/cove/internal/handlers"
-	// appmid "github.com/egeuysall/cove/internal/middleware"
+	"github.com/egeuysall/blog/internal/handlers"
+	appmid "github.com/egeuysall/blog/internal/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httprate"
@@ -68,9 +68,16 @@ func Router() *chi.Mux {
 	r.Get("/", handlers.HandleRoot)
 	r.Get("/ping", handlers.HandlePing)
 
-	// Protected API v1 routes
 	r.Route("/v1", func(r chi.Router) {
-		r.Use(appmid.RequireAuth())
+		r.Get("/blogs", handlers.HandleGetPaginatedBlogs)
+		r.Get("/blogs/{slug}", handlers.HandleGetBlogBySlug)
+
+		// Protected API v1 routes
+		r.Group(func(r chi.Router) {
+			r.Use(appmid.RequireAuth())
+			r.Post("/blogs", handlers.HandleCreateBlog)
+		})
+
 	})
 
 	return r

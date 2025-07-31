@@ -27,8 +27,8 @@ export const Footer: React.FC = () => {
 
   // TODO: Fill these
   const companyInfo = {
-    name: '',
-    slogan: '',
+    name: 'By Ege',
+    slogan: 'Innovate. Optimize. Create.',
   };
 
   /**
@@ -41,22 +41,8 @@ export const Footer: React.FC = () => {
 
   // TODO: Fill these
   const resourceLinks: ResourceLink[] = [
-    {
-      title: '',
-      href: '',
-    },
-    {
-      title: '',
-      href: '',
-    },
-    {
-      title: '',
-      href: '',
-    },
-    {
-      title: '',
-      href: '',
-    },
+    { title: 'Blog', href: '/' },
+    { title: 'Links', href: 'https://www.link.egeuysal.com' },
   ];
 
   /**
@@ -71,21 +57,21 @@ export const Footer: React.FC = () => {
   const socialLinks: SocialLink[] = [
     {
       name: 'Website',
-      href: '',
+      href: 'https://www.egeuysal.com',
       icon: Globe,
       size: 28,
       ariaLabel: 'Website',
     },
     {
       name: 'GitHub',
-      href: '',
+      href: 'https://github.com/egeuysall/blog',
       icon: Github,
       size: 28,
       ariaLabel: 'GitHub',
     },
     {
       name: 'Email',
-      href: '',
+      href: 'mailto:hi@egeuysal.comx',
       icon: Mail,
       size: 28,
       ariaLabel: 'Email',

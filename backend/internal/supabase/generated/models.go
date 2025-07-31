@@ -11,8 +11,10 @@ import (
 type BlogPost struct {
 	ID        pgtype.UUID
 	Title     string
+	Content   string
 	Slug      string
 	Tags      []string
 	CreatedAt pgtype.Timestamptz
 	CreatedBy string
+	CoverLink pgtype.Text
 }

@@ -19,10 +19,9 @@
 //
 // Import this package and use the middleware functions with your router:
 //
-//   r.Use(middleware.RequireAuth())
-//   r.Use(middleware.Cors())
-//   r.Use(middleware.SetContentType())
-//
+//	r.Use(middleware.RequireAuth())
+//	r.Use(middleware.Cors())
+//	r.Use(middleware.SetContentType())
 package middleware
 
 import (
@@ -34,7 +33,7 @@ import (
 	"strings"
 	"time"
 
-	// "github.com/egeuysall/cove/internal/utils"
+	"github.com/egeuysall/blog/internal/utils"
 	"github.com/go-chi/cors"
 	"github.com/golang-jwt/jwt/v5"
 )

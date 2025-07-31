@@ -1,4 +1,3 @@
-//
 // Package models defines the core data structures and types used throughout the backend service.
 //
 // This file is intended to contain Go structs and type definitions that represent the main entities
@@ -13,12 +12,24 @@
 //
 // # Example
 //
-//   type User struct {
-//       ID        string    `json:"id"`
-//       Email     string    `json:"email"`
-//       CreatedAt time.Time `json:"created_at"`
-//   }
+//	type User struct {
+//	    ID        string    `json:"id"`
+//	    Email     string    `json:"email"`
+//	    CreatedAt time.Time `json:"created_at"`
+//	}
 //
 // Add new models below as your application grows.
-//
 package models
+
+import "time"
+
+type Blog struct {
+	ID        string    `json:"id"`
+	Title     string    `json:"title"`
+	Content   string    `json:"content"`
+	Slug      string    `json:"slug"`
+	Tags      []string  `json:"tags"`
+	CreatedAt time.Time `json:"created_at"`
+	CreatedBy string    `json:"created_by"`
+	CoverLink string    `json:"cover_link"`
+}

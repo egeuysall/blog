@@ -1,168 +1,281 @@
-/**
- * Landing Page Component
- *
- * This component renders the main landing page for the developer workspace platform.
- * It includes the following sections:
- *  - Hero section with headline, description, and call-to-action button
- *  - Features grid showcasing platform capabilities
- *  - Workflow highlight section
- *  - "Get started in minutes" steps
- *  - Pricing plans
- *  - Blog highlights
- *
- * Data for features, pricing, how it works, and blogs are imported from their respective modules.
- * UI components are imported from the component library and Lucide icons.
- */
+'use client';
 
-import React from 'react';
+import { Badge } from '@/components/ui/badge';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
-import Image from 'next/image';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationEllipsis,
+} from '@/components/ui/pagination';
 import Link from 'next/link';
-import { features } from '@/lib/features';
-import { pricing } from '@/lib/pricing';
-import { howWorks } from '@/lib/howWorks';
-import { blogs } from '@/lib/blogs';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, ArrowRight } from 'lucide-react';
 
-/**
- * Landing
- *
- * The main landing page functional component.
- */
-const Landing: React.FC = () => {
+type Blog = {
+  id: string;
+  title: string;
+  content: string;
+  slug: string;
+  tags: string[];
+  created_at: string;
+  created_by: string;
+  cover_link: string;
+};
+
+const PAGE_SIZE = 9;
+
+const Home: React.FC = () => {
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [latestBlog, setLatestBlog] = useState<Blog | null>(null);
+  const [page, setPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+
+  // Fetch paginated blogs
+  useEffect(() => {
+    const getBlogs = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`${apiUrl}?page=${page}&limit=${PAGE_SIZE}`);
+        if (!res.ok) {
+          throw new Error('Failed to fetch blog posts');
+        }
+        let data = await res.json();
+        let blogsData: Blog[] = Array.isArray(data) ? data : data.data || [];
+        setBlogs(blogsData);
+
+        // If API returns total count, calculate total pages
+        if (data && typeof data.total === 'number') {
+          setTotalPages(Math.max(1, Math.ceil(data.total / PAGE_SIZE)));
+        } else if (blogsData.length < PAGE_SIZE && page === 1) {
+          setTotalPages(1);
+        } else if (blogsData.length < PAGE_SIZE) {
+          setTotalPages(page);
+        }
+      } catch (error) {
+        console.error('Error fetching blogs:', error);
+        toast('Error getting blogs');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getBlogs();
+  }, [apiUrl, page]);
+
+  // Fetch latest blog for the hero section
+  useEffect(() => {
+    const getLatestBlog = async () => {
+      try {
+        const res = await fetch(`${apiUrl}?page=1&limit=1`);
+        if (!res.ok) {
+          throw new Error('Failed to fetch latest blog post');
+        }
+        let data = await res.json();
+        const latest = Array.isArray(data) ? data[0] : (data.data && data.data[0]) || null;
+
+        if (latest) {
+          setLatestBlog({
+            ...latest,
+            created_at: latest.created_at
+              ? new Date(latest.created_at).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })
+              : '',
+          });
+        } else {
+          setLatestBlog(null);
+        }
+      } catch (error) {
+        console.error('Error fetching latest blog:', error);
+        toast('Error getting latest blog');
+      }
+    };
+
+    getLatestBlog();
+  }, [apiUrl]);
+
+  // Helper to generate pagination items (with ellipsis if needed)
+  const renderPaginationItems = () => {
+    const items = [];
+    const maxPageButtons = 5;
+    let startPage = Math.max(1, page - 2);
+    let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
+
+    if (endPage - startPage < maxPageButtons - 1) {
+      startPage = Math.max(1, endPage - maxPageButtons + 1);
+    }
+
+    if (startPage > 1) {
+      items.push(
+        <PaginationItem key={1}>
+          <PaginationLink isActive={page === 1} onClick={() => setPage(1)}>
+            1
+          </PaginationLink>
+        </PaginationItem>
+      );
+      if (startPage > 2) {
+        items.push(
+          <PaginationItem key="start-ellipsis">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      items.push(
+        <PaginationItem key={i}>
+          <PaginationLink isActive={page === i} onClick={() => setPage(i)}>
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        items.push(
+          <PaginationItem key="end-ellipsis">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+      items.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink isActive={page === totalPages} onClick={() => setPage(totalPages)}>
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    return items;
+  };
+
   return (
-    <main className="flex flex-col gap-18">
-      {/* Hero Section */}
-      <section className="w-full flex flex-col items-center gap-lg">
-        <h1 className="md:w-3/4 text-center">The dev workspace that keeps up with you.</h1>
-        <p className="md:w-3/4 text-center text-neutral-700 dark:text-neutral-300">
-          A single platform to organize code, manage tasks, and document projects helping developers
-          streamline their workflow and deliver results faster.
-        </p>
+    <main className="w-full flex flex-col gap-lg">
+      <h2>By Ege</h2>
+      {/* Hero section with latest blog */}
+      <section className="w-full flex flex-col md:flex-row gap-2xl md:items-center">
+        {latestBlog ? (
+          <>
+            <div>
+              <img
+                src={latestBlog.cover_link}
+                alt="Blog image"
+                className="w-128 h-80 rounded-md aspect-video object-cover"
+              />
+            </div>
+            <div>
+              <p className="text-small text-neutral-700 dark:text-neutral-300">
+                Article &bull; {latestBlog.created_at}
+              </p>
+              <h4>{latestBlog.title}</h4>
+              <p className="mb-md text-small text-neutral-700 dark:text-neutral-300">
+                By {latestBlog.created_by}
+              </p>
+              <div className="mb-md hidden md:block">
+                {latestBlog.tags.map((tag) => {
+                  return (
+                    <Badge className="mr-sm" key={tag}>
+                      {tag}
+                    </Badge>
+                  );
+                })}
+              </div>
+              <p className="hidden md:block">
+                {latestBlog.content
+                  ? latestBlog.content.split(/\s+/).slice(0, 15).join(' ') +
+                    (latestBlog.content.split(/\s+/).length > 15 ? '…' : '')
+                  : ''}
+              </p>
+            </div>
+          </>
+        ) : (
+          <div className="w-full flex justify-center items-center py-16">
+            <span>No latest blog found.</span>
+          </div>
+        )}
+      </section>
 
-        {/* Call-to-Action Button */}
-        <Link href="">
-          <Button className="mb-lg">Get started for free</Button>
-        </Link>
-
-        {/* Features Grid */}
-        <section className="grid grid-cols-6 gap-md w-full">
-          {features.map((feature, index) => (
-            <Card key={index} className={feature.colSpan}>
-              <CardHeader>
-                <CardTitle className="flex gap-xs items-center">
-                  <div className="p-2xs bg-neutral-300 dark:bg-neutral-700 rounded-sm">
-                    {feature.icon && (
-                      <span className="text-neutral-700 dark:text-neutral-300">{feature.icon}</span>
-                    )}
+      {/* Paginated blog list */}
+      <section className="w-full flex flex-col gap-lg mt-8">
+        <h3 className="text-h4">Editor's Picks</h3>
+        {loading ? (
+          <div className="text-center py-8">Loading...</div>
+        ) : blogs.length === 0 ? (
+          <div className="text-center py-8">No blog posts found.</div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-lg">
+            {blogs.map((blog) => (
+              <Link href={blog.slug}>
+                <section key={blog.id}>
+                  <div className="flex flex-col gap-md">
+                    <img
+                      src={blog.cover_link}
+                      className="w-full md:w-96 h-64 rounded-md aspect-video object-cover"
+                    />
+                    <span className="text-small text-neutral-700 dark:text-neutral-300">
+                      Article &bull;{' '}
+                      {new Date(blog.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </span>
                   </div>
-                  {feature.title}
-                </CardTitle>
-                <CardDescription className="text-small">{feature.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Image
-                  width={1920}
-                  height={900}
-                  alt={`${feature.title} illustration`}
-                  className="object-cover rounded-md"
-                  src={feature.imageSrc}
+                  <p className="font-semibold">{blog.title}</p>
+                  <p className="text-small text-neutral-700 dark:text-neutral-300 mb-sm">
+                    By {blog.created_by}
+                  </p>
+                  <div>
+                    {blog.tags.map((tag) => (
+                      <Badge key={tag} className="mr-sm">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </section>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        <div className="flex justify-center items-center gap-md mt-4">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={page > 1 && !loading ? () => setPage(page - 1) : undefined}
+                  aria-disabled={page === 1 || loading}
+                  tabIndex={page === 1 || loading ? -1 : 0}
+                  style={{ pointerEvents: page === 1 || loading ? 'none' : undefined }}
                 />
-              </CardContent>
-            </Card>
-          ))}
-        </section>
-      </section>
-
-      {/* Workflow Highlight Section */}
-      <section className="w-full flex flex-col items-center gap-lg bg-primary-300 dark:bg-primary-700 p-xl rounded-md">
-        <h2 className="md:w-3/4 text-center">
-          Better workflows <br /> make better <span className="italic">things.</span>
-        </h2>
-      </section>
-
-      {/* How It Works Section */}
-      <section className="w-full flex flex-col items-center gap-lg">
-        <h3 className="text-center w-3/4">Get started in minutes</h3>
-        <p className="w-3/4 text-center text-neutral-700 dark:text-neutral-300">
-          Start working instantly with code, docs, and tasks
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-md w-full">
-          {howWorks.map((step, index) => (
-            <Card key={index}>
-              <CardContent className="flex flex-col items-center text-center gap-xs">
-                <div className="p-md bg-neutral-300 dark:bg-neutral-700 rounded-full text-neutral-700 dark:text-primary-300">
-                  {step.icon}
-                </div>
-                <h3 className="text-xl font-semibold">{step.title}</h3>
-                <p className="text-neutral-700 dark:text-neutral-300 text-small">
-                  {step.description}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section className="w-full flex flex-col items-center gap-lg">
-        <h2 className="w-3/4 text-center">Pricing</h2>
-        <p className="w-3/4 text-center text-neutral-700 dark:text-neutral-300">
-          Choose a plan that works for you.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-md w-full">
-          {pricing.map((tier, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <CardTitle>{tier.title}</CardTitle>
-                <CardDescription>{tier.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-lg">
-                <div className="flex items-baseline gap-xs">
-                  <span className="text-4xl font-bold">{tier.price}</span>
-                  {tier.price !== 'Custom' && <span className="text-neutral-500">/ month</span>}
-                </div>
-                <ul className="flex flex-col gap-sm">
-                  {tier.features.map((feature, i) => (
-                    <li key={i} className="flex items-center gap-xs">
-                      <Check className="w-4 h-4 text-primary-500" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <Button>{tier.cta}</Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      {/* Blog Highlights Section */}
-      <section className="w-full flex flex-col items-center gap-lg">
-        <h2 className="w-3/4 text-center">From our Blog</h2>
-        <p className="w-3/4 text-center text-neutral-700 dark:text-neutral-300">
-          Tips, tricks, and updates from our team.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-md w-full">
-          {blogs.map((post, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <CardTitle>{post.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-neutral-700 text-small dark:text-neutral-300">{post.excerpt}</p>
-                <Link href={post.link} className="flex items-center text-small gap-2xs">
-                  Read more <ArrowRight size={14} />
-                </Link>
-              </CardContent>
-            </Card>
-          ))}
+              </PaginationItem>
+              {renderPaginationItems()}
+              <PaginationItem>
+                <PaginationNext
+                  onClick={page < totalPages && !loading ? () => setPage(page + 1) : undefined}
+                  aria-disabled={page === totalPages || loading}
+                  tabIndex={page === totalPages || loading ? -1 : 0}
+                  style={{ pointerEvents: page === totalPages || loading ? 'none' : undefined }}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         </div>
       </section>
     </main>
   );
 };
 
-export default Landing;
+export default Home;

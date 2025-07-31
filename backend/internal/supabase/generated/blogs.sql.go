@@ -11,42 +11,93 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createPost = `-- name: CreatePost :one
-INSERT INTO blog_posts (id, title, slug, tags, created_by)
-VALUES ($1, $2, $3, $4, $5)
-    RETURNING id, title, slug, tags, created_at, created_by
+const createPost = `-- name: CreatePost :exec
+INSERT INTO blog_posts (
+    title,
+    content,
+    slug,
+    tags,
+    created_by,
+    cover_link
+)
+VALUES (
+           $1, $2, $3, $4, $5, $6
+       )
 `
 
 type CreatePostParams struct {
-	ID        pgtype.UUID
 	Title     string
+	Content   string
 	Slug      string
 	Tags      []string
 	CreatedBy string
+	CoverLink pgtype.Text
 }
 
-func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (BlogPost, error) {
-	row := q.db.QueryRow(ctx, createPost,
-		arg.ID,
+func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
+	_, err := q.db.Exec(ctx, createPost,
 		arg.Title,
+		arg.Content,
 		arg.Slug,
 		arg.Tags,
 		arg.CreatedBy,
+		arg.CoverLink,
 	)
-	var i BlogPost
+	return err
+}
+
+const getBlogBySlug = `-- name: GetBlogBySlug :one
+SELECT
+    id,
+    title,
+    content,
+    slug,
+    tags,
+    created_by,
+    cover_link,
+    created_at
+FROM blog_posts
+WHERE slug = $1
+`
+
+type GetBlogBySlugRow struct {
+	ID        pgtype.UUID
+	Title     string
+	Content   string
+	Slug      string
+	Tags      []string
+	CreatedBy string
+	CoverLink pgtype.Text
+	CreatedAt pgtype.Timestamptz
+}
+
+func (q *Queries) GetBlogBySlug(ctx context.Context, slug string) (GetBlogBySlugRow, error) {
+	row := q.db.QueryRow(ctx, getBlogBySlug, slug)
+	var i GetBlogBySlugRow
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
+		&i.Content,
 		&i.Slug,
 		&i.Tags,
-		&i.CreatedAt,
 		&i.CreatedBy,
+		&i.CoverLink,
+		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const listPaginatedPosts = `-- name: ListPaginatedPosts :many
-SELECT id, title, slug, tags, created_at, created_by FROM blog_posts
+SELECT
+    id,
+    title,
+    content,
+    slug,
+    tags,
+    created_by,
+    cover_link,
+    created_at
+FROM blog_posts
 ORDER BY created_at DESC
     LIMIT $1 OFFSET $2
 `
@@ -56,22 +107,35 @@ type ListPaginatedPostsParams struct {
 	Offset int32
 }
 
-func (q *Queries) ListPaginatedPosts(ctx context.Context, arg ListPaginatedPostsParams) ([]BlogPost, error) {
+type ListPaginatedPostsRow struct {
+	ID        pgtype.UUID
+	Title     string
+	Content   string
+	Slug      string
+	Tags      []string
+	CreatedBy string
+	CoverLink pgtype.Text
+	CreatedAt pgtype.Timestamptz
+}
+
+func (q *Queries) ListPaginatedPosts(ctx context.Context, arg ListPaginatedPostsParams) ([]ListPaginatedPostsRow, error) {
 	rows, err := q.db.Query(ctx, listPaginatedPosts, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []BlogPost
+	var items []ListPaginatedPostsRow
 	for rows.Next() {
-		var i BlogPost
+		var i ListPaginatedPostsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
+			&i.Content,
 			&i.Slug,
 			&i.Tags,
-			&i.CreatedAt,
 			&i.CreatedBy,
+			&i.CoverLink,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
