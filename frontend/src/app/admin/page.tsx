@@ -268,9 +268,11 @@ const AdminPage: React.FC = () => {
                 onChange={(e) => handleTagsChange(e.target.value)}
               />
               {tags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-1" role="group" aria-label="Selected tags">
+                <div className="mt-2xs" role="group" aria-label="Selected tags">
                   {tags.map((tag, index) => (
-                    <Badge>{tag}</Badge>
+                    <Badge className="mr-2xs" key={index}>
+                      {tag}
+                    </Badge>
                   ))}
                 </div>
               )}

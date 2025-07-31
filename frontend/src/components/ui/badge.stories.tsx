@@ -31,13 +31,6 @@ export const Default: Story = {
   },
 };
 
-export const Secondary: Story = {
-  args: {
-    variant: 'secondary',
-    children: 'Secondary Badge',
-  },
-};
-
 export const Destructive: Story = {
   args: {
     variant: 'destructive',

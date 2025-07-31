@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
+import type { Blog } from '@/types/general';
 import {
   Pagination,
   PaginationContent,
@@ -14,17 +15,6 @@ import {
   PaginationEllipsis,
 } from '@/components/ui/pagination';
 import Link from 'next/link';
-
-type Blog = {
-  id: string;
-  title: string;
-  content: string;
-  slug: string;
-  tags: string[];
-  created_at: string;
-  created_by: string;
-  cover_link: string;
-};
 
 const PAGE_SIZE = 9;
 
@@ -42,17 +32,22 @@ const Home: React.FC = () => {
     const getBlogs = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${apiUrl}?page=${page}&limit=${PAGE_SIZE}`);
+        const res = await fetch(`${apiUrl}?page=${page}&limit=${PAGE_SIZE + 1}`);
         if (!res.ok) {
           throw new Error('Failed to fetch blog posts');
         }
-        let data = await res.json();
+        const data = await res.json();
         let blogsData: Blog[] = Array.isArray(data) ? data : data.data || [];
+
+        if (blogsData.length > 0) {
+          blogsData = blogsData.slice(1);
+        }
+
         setBlogs(blogsData);
 
-        // If API returns total count, calculate total pages
         if (data && typeof data.total === 'number') {
-          setTotalPages(Math.max(1, Math.ceil(data.total / PAGE_SIZE)));
+          const adjustedTotal = Math.max(0, data.total - 1);
+          setTotalPages(Math.max(1, Math.ceil(adjustedTotal / PAGE_SIZE)));
         } else if (blogsData.length < PAGE_SIZE && page === 1) {
           setTotalPages(1);
         } else if (blogsData.length < PAGE_SIZE) {
@@ -77,7 +72,7 @@ const Home: React.FC = () => {
         if (!res.ok) {
           throw new Error('Failed to fetch latest blog post');
         }
-        let data = await res.json();
+        const data = await res.json();
         const latest = Array.isArray(data) ? data[0] : (data.data && data.data[0]) || null;
 
         if (latest) {
@@ -108,7 +103,7 @@ const Home: React.FC = () => {
     const items = [];
     const maxPageButtons = 5;
     let startPage = Math.max(1, page - 2);
-    let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
+    const endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
 
     if (endPage - startPage < maxPageButtons - 1) {
       startPage = Math.max(1, endPage - maxPageButtons + 1);
@@ -165,18 +160,21 @@ const Home: React.FC = () => {
     <main className="w-full flex flex-col gap-lg">
       <h2>By Ege</h2>
       {/* Hero section with latest blog */}
-      <section className="w-full flex flex-col md:flex-row gap-2xl md:items-center">
+      <section>
         {latestBlog ? (
-          <>
+          <Link
+            href={`/${latestBlog.slug}`}
+            className="no-underline text-neutral-900 dark:text-neutral-100 w-full flex flex-col md:flex-row gap-2xl md:items-center"
+          >
             <div>
               <img
                 src={latestBlog.cover_link}
-                alt="Blog image"
+                alt="Cover image"
                 className="w-128 h-80 rounded-md aspect-video object-cover"
               />
             </div>
             <div>
-              <p className="text-small text-neutral-700 dark:text-neutral-300">
+              <p className="text-small text-neutral-700 dark:text-neutral-300 no-underline">
                 Article &bull; {latestBlog.created_at}
               </p>
               <h4>{latestBlog.title}</h4>
@@ -199,7 +197,7 @@ const Home: React.FC = () => {
                   : ''}
               </p>
             </div>
-          </>
+          </Link>
         ) : (
           <div className="w-full flex justify-center items-center py-16">
             <span>No latest blog found.</span>
@@ -209,7 +207,7 @@ const Home: React.FC = () => {
 
       {/* Paginated blog list */}
       <section className="w-full flex flex-col gap-lg mt-8">
-        <h3 className="text-h4">Editor's Picks</h3>
+        <h3 className="text-h4">Editor&apos;s Picks</h3>
         {loading ? (
           <div className="text-center py-8">Loading...</div>
         ) : blogs.length === 0 ? (
@@ -217,11 +215,16 @@ const Home: React.FC = () => {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-lg">
             {blogs.map((blog) => (
-              <Link href={blog.slug}>
+              <Link
+                href={blog.slug}
+                className="no-underline text-neutral-900 dark:text-neutral-100"
+                key={blog.id}
+              >
                 <section key={blog.id}>
                   <div className="flex flex-col gap-md">
                     <img
                       src={blog.cover_link}
+                      alt="Cover image"
                       className="w-full md:w-96 h-64 rounded-md aspect-video object-cover"
                     />
                     <span className="text-small text-neutral-700 dark:text-neutral-300">
