@@ -23,7 +23,7 @@ import { getProduct } from '@/lib/site-details';
  */
 
 // TODO: Fill these
-export const name = 'By Ege';
+export const name = 'By Ege: Innovate. Optimize. Create.';
 
 /**
  * The main image URL for the site or application.
