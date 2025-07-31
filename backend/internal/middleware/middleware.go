@@ -157,7 +157,7 @@ func UserIDFromContext(ctx context.Context) (string, bool) {
 // Credentials are allowed. MaxAge is 3600 seconds.
 func Cors() func(next http.Handler) http.Handler {
 	return cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://www.cove.egeuysal.com", "http://localhost:3000"},
+		AllowedOrigins:   []string{"https://www.blog.egeuysal.com", "http://localhost:3000"},
 		AllowedMethods:   []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		AllowCredentials: true,

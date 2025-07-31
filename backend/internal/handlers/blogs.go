@@ -122,6 +122,7 @@ func HandleGetBlogBySlug(w http.ResponseWriter, r *http.Request) {
 		Title:     blog.Title,
 		Content:   blog.Content,
 		Slug:      blog.Slug,
+		Tags:      blog.Tags,
 		CreatedAt: blog.CreatedAt.Time,
 		CreatedBy: blog.CreatedBy,
 		CoverLink: blog.CoverLink.String,
