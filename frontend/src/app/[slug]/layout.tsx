@@ -1,4 +1,4 @@
-import type { Metadata, ResolvingMetadata } from 'next';
+import type { Metadata } from 'next';
 
 type Props = {
   params: { slug: string };
@@ -15,10 +15,7 @@ function getShortDescription(text: string, maxLength = 165): string {
   return trimmed.slice(0, lastSpace > 0 ? lastSpace : maxLength) + '...';
 }
 
-export async function generateMetadata(
-  { params }: Props,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const slug = params.slug;
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
