@@ -5,7 +5,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const badgeVariants = cva(
-  'transition-colors duration-200 ease-in-out disabled:bg-neutral-700 disabled:dark:bg-neutral-300 disabled:dark:text-neutral-900 font-normal !text-small py-xs px-sm rounded-sm',
+  'transition-colors duration-200 ease-in-out disabled:bg-neutral-700 disabled:dark:bg-neutral-300 disabled:dark:text-neutral-900 font-normal !text-small py-xs px-sm rounded-md',
   {
     variants: {
       variant: {
