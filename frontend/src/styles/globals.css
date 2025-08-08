@@ -221,6 +221,11 @@
     @apply mb-2xs;
   }
 
+  /* Image Styling */
+  img {
+    @apply w-full h-64 object-cover rounded-md;
+  }
+
   /* Code blocks */
   pre,
   code {
