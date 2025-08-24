@@ -215,6 +215,7 @@
   ul,
   ol {
     @apply mb-xs;
+    @apply list-none;
   }
 
   ul {

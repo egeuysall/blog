@@ -1,5 +1,5 @@
 ul,
 ol {
-  list-style-position: inside;
-  list-style-type: initial;
+  list-style-position: inside !important;
+  list-style-type: initial !important;
 }
