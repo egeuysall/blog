@@ -218,14 +218,6 @@
     @apply list-none;
   }
 
-  ul {
-    list-style-type: disc;
-  }
-
-  ol {
-    list-style-type: decimal;
-  }
-
   li {
     @apply mb-2xs;
   }

@@ -3,3 +3,11 @@ ol {
   list-style-position: inside !important;
   list-style-type: initial !important;
 }
+
+ul {
+  list-style-type: disc !important;
+}
+
+ol {
+  list-style-type: decimal !important;
+}
