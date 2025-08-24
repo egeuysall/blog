@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import '@/styles/blog.css';
 
 type Props = {
   params: { slug: string };
