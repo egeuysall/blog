@@ -215,6 +215,17 @@
   ul,
   ol {
     @apply mb-xs;
+    list-style-position: inside;
+    /* Ensure default list styles are shown */
+    list-style-type: initial;
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol {
+    list-style-type: decimal;
   }
 
   li {
