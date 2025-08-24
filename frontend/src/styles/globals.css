@@ -214,7 +214,7 @@
   /* List formatting */
   ul,
   ol {
-    @apply mb-xs list-none;
+    @apply mb-xs;
   }
 
   li {
