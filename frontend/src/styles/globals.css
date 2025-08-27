@@ -340,7 +340,7 @@
 
   blockquote {
     @apply pl-sm;
-    @apply border-l-4 border-b-neutral-300 dark:border-neutral-700;
+    @apply border-l-4 border-neutral-300 dark:border-neutral-700;
     @apply my-xs;
     @apply italic;
   }
