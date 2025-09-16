@@ -36,9 +36,9 @@ services:
       - app-network
     restart: unless-stopped
 
-  server:
+  nginx:
     image: nginx:stable-alpine
-    container_name: nginx
+    container_name: server
     restart: always
     ports:
       - "80:80"
