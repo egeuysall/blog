@@ -36,7 +36,7 @@ services:
       - app-network
     restart: unless-stopped
 
-  nginx:
+  server:
     image: nginx:stable-alpine
     container_name: nginx
     restart: always
