@@ -164,8 +164,8 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
               </div>
               <p className="hidden md:block">
                 {latestBlog.content
-                  ? latestBlog.content.split(/\s+/).slice(0, 15).join(' ') +
-                    (latestBlog.content.split(/\s+/).length > 15 ? '…' : '')
+                  ? latestBlog.content.split(/\s+/).slice(0, 25).join(' ') +
+                    (latestBlog.content.split(/\s+/).length > 25 ? '…' : '')
                   : ''}
               </p>
             </div>
