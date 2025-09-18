@@ -5,7 +5,7 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 async function fetchAllPosts(): Promise<Blog[]> {
   try {
-    const res = await fetch(`${apiUrl}/posts`, {
+    const res = await fetch(`${apiUrl}`, {
       cache: 'no-store',
     });
 
