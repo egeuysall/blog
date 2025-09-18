@@ -18,7 +18,8 @@ export async function generateStaticParams() {
 }
 
 export default async function BlogPage({ params }: { params: { slug: string } }) {
-  const res = await fetch(`${apiUrl}/${encodeURIComponent(params.slug)}`, {
+  const { slug } = await params;
+  const res = await fetch(`${apiUrl}/${encodeURIComponent(slug)}`, {
     cache: 'force-cache',
   });
 
