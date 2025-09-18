@@ -1,279 +1,69 @@
-'use client';
-
-import { Badge } from '@/components/ui/badge';
-import React, { useEffect, useState } from 'react';
-import { toast } from 'sonner';
-
 import type { Blog } from '@/types/general';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationPrevious,
-  PaginationNext,
-  PaginationEllipsis,
-} from '@/components/ui/pagination';
-import Link from 'next/link';
+import { BlogHome } from '@/components/blocks/blog-home';
 
 const PAGE_SIZE = 9;
-const CACHE_OPTION: RequestCache = 'force-cache';
 
-const Home: React.FC = () => {
-  const [blogs, setBlogs] = useState<Blog[]>([]);
-  const [latestBlog, setLatestBlog] = useState<Blog | null>(null);
-  const [page, setPage] = useState<number>(1);
-  const [totalPages, setTotalPages] = useState<number>(1);
-  const [loading, setLoading] = useState<boolean>(false);
-
+async function getHomeData() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
-  // Fetch paginated blogs
-  useEffect(() => {
-    const getBlogs = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(`${apiUrl}?page=${page}&limit=${PAGE_SIZE + 1}`, {
-          cache: CACHE_OPTION,
-        });
-        if (!res.ok) throw new Error('Failed to fetch blog posts');
+  try {
+    const res = await fetch(`${apiUrl}?page=1&limit=${PAGE_SIZE + 1}`, {
+      next: { revalidate: 60 },
+      cache: 'force-cache',
+    });
+    if (!res.ok) throw new Error('Failed to fetch blog posts');
 
-        const data = await res.json();
-        let blogsData: Blog[] = Array.isArray(data) ? data : data.data || [];
+    const data = await res.json();
+    const allBlogs: Blog[] = Array.isArray(data) ? data : data.data || [];
 
-        if (blogsData.length > 0) blogsData = blogsData.slice(1); // skip latest
+    let latestBlog: Blog | null = null;
+    if (allBlogs && allBlogs.length > 0 && allBlogs[0]) {
+      latestBlog = {
+        ...allBlogs[0],
+        created_at: allBlogs[0].created_at
+          ? new Date(allBlogs[0].created_at).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })
+          : '',
+      };
+    }
 
-        setBlogs(blogsData);
+    const firstPageBlogs = allBlogs.slice(1);
 
-        if (data && typeof data.total === 'number') {
-          const adjustedTotal = Math.max(0, data.total - 1);
-          setTotalPages(Math.max(1, Math.ceil(adjustedTotal / PAGE_SIZE)));
-        } else if (blogsData.length < PAGE_SIZE && page === 1) {
-          setTotalPages(1);
-        } else if (blogsData.length < PAGE_SIZE) {
-          setTotalPages(page);
-        }
-      } catch (error) {
-        console.error(error);
-        toast('Error fetching blogs');
-      } finally {
-        setLoading(false);
-      }
+    let totalPages = 1;
+    if (data && typeof data.total === 'number') {
+      const adjustedTotal = Math.max(0, data.total - 1);
+      totalPages = Math.max(1, Math.ceil(adjustedTotal / PAGE_SIZE));
+    } else if (firstPageBlogs.length === PAGE_SIZE) {
+      totalPages = 2;
+    }
+
+    return {
+      initialLatestBlog: latestBlog,
+      initialBlogs: firstPageBlogs,
+      initialTotalPages: totalPages,
     };
-
-    getBlogs();
-  }, [apiUrl, page]);
-
-  // Fetch latest blog (hero)
-  useEffect(() => {
-    const getLatestBlog = async () => {
-      try {
-        const res = await fetch(`${apiUrl}?page=1&limit=1`, { cache: CACHE_OPTION });
-        if (!res.ok) throw new Error('Failed to fetch latest blog');
-
-        const data = await res.json();
-        const latest = Array.isArray(data) ? data[0] : (data.data && data.data[0]) || null;
-
-        if (latest) {
-          setLatestBlog({
-            ...latest,
-            created_at: latest.created_at
-              ? new Date(latest.created_at).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                })
-              : '',
-          });
-        } else {
-          setLatestBlog(null);
-        }
-      } catch (error) {
-        console.error(error);
-        toast('Error fetching latest blog');
-      }
+  } catch (error) {
+    console.error('Error fetching home data:', error);
+    return {
+      initialLatestBlog: null,
+      initialBlogs: [],
+      initialTotalPages: 1,
     };
+  }
+}
 
-    getLatestBlog();
-  }, [apiUrl]);
-
-  // Pagination helper
-  const renderPaginationItems = () => {
-    const items = [];
-    const maxPageButtons = 5;
-    let startPage = Math.max(1, page - 2);
-    const endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
-
-    if (endPage - startPage < maxPageButtons - 1)
-      startPage = Math.max(1, endPage - maxPageButtons + 1);
-
-    if (startPage > 1) {
-      items.push(
-        <PaginationItem key={1}>
-          <PaginationLink isActive={page === 1} onClick={() => setPage(1)}>
-            1
-          </PaginationLink>
-        </PaginationItem>
-      );
-      if (startPage > 2)
-        items.push(
-          <PaginationItem key="start-ellipsis">
-            <PaginationEllipsis />
-          </PaginationItem>
-        );
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      items.push(
-        <PaginationItem key={i}>
-          <PaginationLink isActive={page === i} onClick={() => setPage(i)}>
-            {i}
-          </PaginationLink>
-        </PaginationItem>
-      );
-    }
-
-    if (endPage < totalPages) {
-      if (endPage < totalPages - 1)
-        items.push(
-          <PaginationItem key="end-ellipsis">
-            <PaginationEllipsis />
-          </PaginationItem>
-        );
-      items.push(
-        <PaginationItem key={totalPages}>
-          <PaginationLink isActive={page === totalPages} onClick={() => setPage(totalPages)}>
-            {totalPages}
-          </PaginationLink>
-        </PaginationItem>
-      );
-    }
-
-    return items;
-  };
+const Home = async () => {
+  const { initialLatestBlog, initialBlogs, initialTotalPages } = await getHomeData();
 
   return (
-    <main className="w-full flex flex-col gap-lg">
-      <h2>By Ege</h2>
-
-      {/* Hero */}
-      <section>
-        {latestBlog ? (
-          <Link
-            href={`/${latestBlog.slug}`}
-            className="no-underline text-neutral-900 dark:text-neutral-100 w-full flex flex-col md:flex-row gap-2xl md:items-center"
-          >
-            <div>
-              <img
-                src={latestBlog.cover_link}
-                alt="Cover image"
-                className="w-128 h-80 rounded-md aspect-video object-cover"
-              />
-            </div>
-            <div>
-              <p className="text-small text-neutral-700 dark:text-neutral-300">
-                Article &bull; {latestBlog.created_at}
-              </p>
-              <h4>{latestBlog.title}</h4>
-              <p className="mb-md text-small text-neutral-700 dark:text-neutral-300">
-                By {latestBlog.created_by}
-              </p>
-              <div className="mb-md hidden md:block">
-                {latestBlog.tags.map((tag) => (
-                  <Badge key={tag} className="mr-sm">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-              <p className="hidden md:block">
-                {latestBlog.content
-                  ? latestBlog.content.split(/\s+/).slice(0, 15).join(' ') +
-                    (latestBlog.content.split(/\s+/).length > 15 ? '…' : '')
-                  : ''}
-              </p>
-            </div>
-          </Link>
-        ) : (
-          <div className="w-full flex justify-center items-center py-16">
-            <span>No latest blog found.</span>
-          </div>
-        )}
-      </section>
-
-      {/* Paginated blogs */}
-      <section className="w-full flex flex-col gap-lg mt-8">
-        <h3 className="text-h4">Editor's Picks</h3>
-        {loading ? (
-          <div className="text-center py-8">Loading...</div>
-        ) : blogs.length === 0 ? (
-          <div className="text-center py-8">No blog posts found.</div>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-lg">
-            {blogs.map((blog) => (
-              <Link
-                href={blog.slug}
-                key={blog.id}
-                className="no-underline text-neutral-900 dark:text-neutral-100"
-              >
-                <section>
-                  <div className="flex flex-col gap-md">
-                    <img
-                      src={blog.cover_link}
-                      alt="Cover image"
-                      className="w-full md:w-96 h-64 rounded-md aspect-video object-cover"
-                    />
-                    <span className="text-small text-neutral-700 dark:text-neutral-300">
-                      Article &bull;{' '}
-                      {new Date(blog.created_at).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </span>
-                  </div>
-                  <p className="font-semibold">{blog.title}</p>
-                  <p className="text-small text-neutral-700 dark:text-neutral-300 mb-sm">
-                    By {blog.created_by}
-                  </p>
-                  <div>
-                    {blog.tags.map((tag) => (
-                      <Badge key={tag} className="mr-sm">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </section>
-              </Link>
-            ))}
-          </div>
-        )}
-
-        {/* Pagination */}
-        <div className="flex justify-center items-center gap-md mt-4">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={page > 1 && !loading ? () => setPage(page - 1) : undefined}
-                  aria-disabled={page === 1 || loading}
-                  tabIndex={page === 1 || loading ? -1 : 0}
-                  style={{ pointerEvents: page === 1 || loading ? 'none' : undefined }}
-                />
-              </PaginationItem>
-              {renderPaginationItems()}
-              <PaginationItem>
-                <PaginationNext
-                  onClick={page < totalPages && !loading ? () => setPage(page + 1) : undefined}
-                  aria-disabled={page === totalPages || loading}
-                  tabIndex={page === totalPages || loading ? -1 : 0}
-                  style={{ pointerEvents: page === totalPages || loading ? 'none' : undefined }}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      </section>
-    </main>
+    <BlogHome
+      initialLatestBlog={initialLatestBlog}
+      initialBlogs={initialBlogs}
+      initialTotalPages={initialTotalPages}
+    />
   );
 };
 

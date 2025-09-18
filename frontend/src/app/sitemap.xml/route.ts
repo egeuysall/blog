@@ -27,7 +27,7 @@ async function fetchAllPosts(): Promise<Blog[]> {
 }
 
 // ISR: regenerate sitemap every 1 hour
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 export const dynamic = 'auto';
 
 export async function GET() {

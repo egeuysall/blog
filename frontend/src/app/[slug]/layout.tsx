@@ -9,7 +9,7 @@ function getShortDescription(text: string, maxLength = 165): string {
   return trimmed.slice(0, lastSpace > 0 ? lastSpace : maxLength) + '...';
 }
 
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 export const dynamic = 'auto';
 
 export async function generateMetadata(
@@ -23,6 +23,7 @@ export async function generateMetadata(
   try {
     res = await fetch(`${apiUrl}/${slug}`);
   } catch (error) {
+    console.error('Error fetching post metadata:', error);
     return {
       title: 'Post Not Found',
       description: 'The requested post could not be found.',
@@ -44,7 +45,11 @@ export async function generateMetadata(
   try {
     const json = await res.json();
     post = json.data;
+    if (!post) {
+      throw new Error('Post data is missing');
+    }
   } catch (error) {
+    console.error('Error parsing post data:', error);
     return {
       title: 'Post Not Found',
       description: 'The requested post could not be found.',

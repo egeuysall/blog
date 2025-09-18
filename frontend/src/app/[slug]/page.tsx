@@ -5,7 +5,7 @@ import ReactMarkdown from 'react-markdown';
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 // Regenerate page every 1 hour
-export const revalidate = 60 * 60;
+export const revalidate = 3600;
 
 export async function generateStaticParams() {
   const res = await fetch(apiUrl, { cache: 'force-cache' });
