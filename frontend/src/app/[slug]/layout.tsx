@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import React from 'react';
+import '@/styles/blog.css';
 
 function getShortDescription(text: string, maxLength = 165): string {
   if (!text) return '';
