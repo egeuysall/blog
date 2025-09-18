@@ -17,13 +17,11 @@ Disallow: /logs/
 
 # Disallow access to specific file types (sensitive or unnecessary for indexing)
 Disallow: /*.json$
-Disallow: /*.xml$
 Disallow: /*.sql$
 Disallow: /*.yml$
 Disallow: /*.config$
 Disallow: /*.env$
 Disallow: /*.log$
-Disallow: /*.md$  # Markdown files are often for documentation purposes
 
 # Block specific bot examples (optional based on your needs)
 User-agent: GPTBot
