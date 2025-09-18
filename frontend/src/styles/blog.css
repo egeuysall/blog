@@ -1,7 +1,7 @@
 ul,
 ol {
-  list-style-position: inside !important;
   list-style-type: initial !important;
+  padding-left: 1rem;
 }
 
 ul {

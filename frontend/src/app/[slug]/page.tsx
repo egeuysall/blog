@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
 import type { Blog } from '@/types/general';
-import ReactMarkdown from 'react-markdown';
+import { Markdown } from '@/components/blocks/markdown';
+import Image from 'next/image';
+import { Separator } from '@/components/ui/separator';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -32,16 +34,21 @@ export default async function BlogPage({ params }: { params: { slug: string } })
 
   return (
     <div className="w-full flex justify-center">
-      <main className="w-full flex flex-col gap-2xl max-w-full md:max-w-3/4 lg:max-w-1/2">
+      <main className="w-full flex flex-col gap-2xl max-w-full md:max-w-3/4 lg:max-w-2/3 xl:max-w-1/2">
         <section className="flex flex-col gap-lg">
-          <img
-            src={data.cover_link}
-            className="w-full h-64 object-cover rounded-md"
-            alt={data.title}
-          />
+          <div className="w-full h-64 relative rounded-md overflow-hidden">
+            <Image
+              src={data.cover_link}
+              alt={data.title}
+              fill
+              style={{ objectFit: 'cover' }}
+              quality={75}
+              priority={true}
+            />
+          </div>
           <div>
             <h2>{data.title}</h2>
-            <p className="text-small text-neutral-700 dark:text-neutral-300">
+            <p className="text-small text-neutral-700 dark:text-neutral-300 mb-md">
               {data.created_at
                 ? `${new Date(data.created_at).toLocaleDateString('en-US', {
                     year: 'numeric',
@@ -50,10 +57,11 @@ export default async function BlogPage({ params }: { params: { slug: string } })
                   })} • By ${data.created_by}`
                 : ''}
             </p>
+            <Separator />
           </div>
         </section>
         <section className="flex flex-col gap-md">
-          <ReactMarkdown>{data.content}</ReactMarkdown>
+          <Markdown>{data.content}</Markdown>
         </section>
       </main>
     </div>

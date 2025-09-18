@@ -3,6 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import Image from 'next/image';
 
 import type { Blog } from '@/types/general';
 import {
@@ -137,11 +138,13 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
             href={`/${latestBlog.slug}`}
             className="no-underline text-neutral-900 dark:text-neutral-100 w-full flex flex-col md:flex-row gap-2xl md:items-center"
           >
-            <div>
-              <img
+            <div className="h-80 relative rounded-md aspect-video overflow-hidden">
+              <Image
                 src={latestBlog.cover_link}
                 alt="Cover image"
-                className="w-128 h-80 rounded-md aspect-video object-cover"
+                fill
+                style={{ objectFit: 'cover' }}
+                quality={75}
               />
             </div>
             <div>
@@ -191,11 +194,15 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
               >
                 <section>
                   <div className="flex flex-col gap-md">
-                    <img
-                      src={blog.cover_link}
-                      alt="Cover image"
-                      className="w-full md:w-96 h-64 rounded-md aspect-video object-cover"
-                    />
+                    <div className="w-full h-64 relative rounded-md aspect-video overflow-hidden">
+                      <Image
+                        src={blog.cover_link}
+                        alt="Cover image"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                        quality={75}
+                      />
+                    </div>
                     <span className="text-small text-neutral-700 dark:text-neutral-300">
                       Article &bull;{' '}
                       {new Date(blog.created_at).toLocaleDateString('en-US', {

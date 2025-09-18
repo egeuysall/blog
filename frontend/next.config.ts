@@ -11,19 +11,25 @@ const nextConfig = (phase: string): NextConfig => {
     reactStrictMode: true,
     poweredByHeader: false,
     productionBrowserSourceMaps: true,
-    
+
     turbopack: {
       rules: {
         '*.svg': ['@svgr/webpack'],
         '*.mdx': ['@mdx-js/loader'],
       },
     },
-    
+
     serverExternalPackages: ['sharp'],
-    
+
     images: {
       formats: ['image/avif', 'image/webp'],
       remotePatterns: [
+        {
+          protocol: 'https',
+          hostname: 'images.pexels.com',
+          port: '',
+          pathname: '/**',
+        },
         {
           protocol: 'https',
           hostname: '**.example.com',
@@ -34,20 +40,22 @@ const nextConfig = (phase: string): NextConfig => {
         },
       ],
     },
-    
+
     compiler: {
-      removeConsole: !isDev ? {
-        exclude: ['error', 'warn'],
-      } : false,
+      removeConsole: !isDev
+        ? {
+            exclude: ['error', 'warn'],
+          }
+        : false,
     },
-    
+
     experimental: {
       serverActions: {
         bodySizeLimit: '2mb',
       },
       optimizeCss: !isDev,
     },
-    
+
     headers: async () => [
       {
         source: '/(.*)',
@@ -60,12 +68,12 @@ const nextConfig = (phase: string): NextConfig => {
         ],
       },
     ],
-    
+
     env: {
       APP_ENV: process.env.NODE_ENV || 'development',
       BUILD_TIME: new Date().toISOString(),
     },
-    
+
     webpack: (config: Configuration, { isServer }: { isServer: boolean }) => {
       if (!isServer) {
         if (!config.optimization) {
@@ -76,7 +84,7 @@ const nextConfig = (phase: string): NextConfig => {
         } else if (!config.optimization.splitChunks.cacheGroups) {
           config.optimization.splitChunks.cacheGroups = {};
         }
-        
+
         config.optimization.splitChunks.cacheGroups = {
           ...config.optimization.splitChunks.cacheGroups,
           commons: {
@@ -98,8 +106,8 @@ const withBundleAnalyzerConfig = withBundleAnalyzer({
 export default (phase: string) => {
   const baseConfig = nextConfig(phase);
   const analyzedConfig = withBundleAnalyzerConfig(baseConfig);
-  
-  return process.env.NODE_ENV === 'production' 
+
+  return process.env.NODE_ENV === 'production'
     ? withSentryConfig(analyzedConfig, {
         silent: true,
         org: process.env.SENTRY_ORG,

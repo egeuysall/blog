@@ -96,7 +96,7 @@ export const Footer: React.FC = () => {
             <nav className="mt-2xs">
               <ul className="flex flex-col">
                 {resourceLinks.map((link, index) => (
-                  <li key={`resource-${index}`} className="text-small">
+                  <li key={`resource-${index}`} className="text-small list-none">
                     <Link href={link.href}>{link.title}</Link>
                   </li>
                 ))}

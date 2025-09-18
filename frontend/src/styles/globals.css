@@ -135,7 +135,7 @@
 
   /* Responsive text */
   html {
-    @apply text-[100%] md:text-[112.5%] lg:text-[125%];
+    @apply text-[clamp(1rem,1.05vw,1.25rem)];
   }
 
   /* Body defaults */
