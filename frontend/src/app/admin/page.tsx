@@ -152,10 +152,12 @@ const AdminPage: React.FC = () => {
   if (loading) {
     return (
       <main className="flex flex-col items-center justify-center min-h-[50vh]" aria-live="polite">
-        <NewtonsCradle size="64" speed="1.4" color="#f5f5f5" aria-hidden="true" />
-        <h1 className="animate-pulse text-center mt-4" role="status">
+        <div className="text-neutral-900 dark:text-neutral-100">
+          <NewtonsCradle size="48" speed="1.4" color="currentColor" aria-hidden="true" />
+        </div>
+        <h3 className="animate-pulse text-center mt-md" role="status">
           Loading...
-        </h1>
+        </h3>
       </main>
     );
   }
