@@ -26,6 +26,8 @@ async function fetchAllPosts(): Promise<Blog[]> {
   }
 }
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const posts = await fetchAllPosts();
