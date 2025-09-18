@@ -138,7 +138,7 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
             href={`/${latestBlog.slug}`}
             className="no-underline text-neutral-900 dark:text-neutral-100 w-full flex flex-col md:flex-row gap-2xl md:items-center"
           >
-            <div className="h-80 relative rounded-md aspect-video overflow-hidden w-full lg:max-w-192">
+            <div className="h-80 relative rounded-md aspect-video overflow-hidden w-full lg:max-w-160">
               <Image
                 src={latestBlog.cover_link}
                 alt="Cover image"
