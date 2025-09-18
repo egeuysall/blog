@@ -63,14 +63,10 @@ export async function generateMetadata(
   const canonical = `${siteUrl.replace(/\/$/, '')}/blog/${slug}`;
   const shortDesc = getShortDescription(post?.content || '');
 
-  // Dynamic OG image overlay URL (Vercel OG Image API or similar)
-  const ogImageUrl = post?.cover_link
-    ? `https://og-image.vercel.app/${encodeURIComponent(
-        post.title
-      )}.png?theme=light&md=0&fontSize=100px&images=${encodeURIComponent(
-        post.cover_link
-      )}&author=${encodeURIComponent(post.created_by)}&date=${encodeURIComponent(post.created_at)}`
-    : undefined;
+  console.log('Cover link:', post?.cover_link);
+  console.log('Full post:', JSON.stringify(post, null, 2));
+
+  const ogImageUrl = post?.cover_link ? post.cover_link : '/site.png';
 
   const metadata: Metadata = {
     title: post?.title,
