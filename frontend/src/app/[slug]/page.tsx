@@ -44,6 +44,7 @@ export default async function BlogPage({ params }: { params: { slug: string } })
               style={{ objectFit: 'cover' }}
               quality={75}
               priority={true}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 50vw"
             />
           </div>
           <div>

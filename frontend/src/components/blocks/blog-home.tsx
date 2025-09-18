@@ -145,6 +145,7 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
                 fill
                 style={{ objectFit: 'cover' }}
                 quality={75}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 50vw"
               />
             </div>
             <div>
@@ -205,6 +206,7 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
                         style={{ objectFit: 'cover' }}
                         quality={75}
                         className="!w-full !h-full"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 50vw"
                       />
                     </div>
                     <span className="text-small text-neutral-700 dark:text-neutral-300">

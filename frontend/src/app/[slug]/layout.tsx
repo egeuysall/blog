@@ -13,11 +13,12 @@ function getShortDescription(text: string, maxLength = 165): string {
 export const revalidate = 3600;
 export const dynamic = 'auto';
 
-export async function generateMetadata(
-  paramsPromise: Promise<{ params: { slug: string } }>
-): Promise<Metadata> {
-  const { params } = await paramsPromise;
-  const slug = params.slug;
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const { slug } = await params;
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
   let res;
@@ -62,9 +63,6 @@ export async function generateMetadata(
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.blog.egeuysal.com';
   const canonical = `${siteUrl.replace(/\/$/, '')}/blog/${slug}`;
   const shortDesc = getShortDescription(post?.content || '');
-
-  console.log('Cover link:', post?.cover_link);
-  console.log('Full post:', JSON.stringify(post, null, 2));
 
   const ogImageUrl = post?.cover_link ? post.cover_link : '/site.png';
 

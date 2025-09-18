@@ -93,14 +93,12 @@ export const Footer: React.FC = () => {
           {/* Resources */}
           <div>
             <h6>Resources</h6>
-            <nav className="mt-2xs">
-              <ul className="flex flex-col">
-                {resourceLinks.map((link, index) => (
-                  <li key={`resource-${index}`} className="text-small list-none">
-                    <Link href={link.href}>{link.title}</Link>
-                  </li>
-                ))}
-              </ul>
+            <nav className="mt-2xs flex flex-col">
+              {resourceLinks.map((link, index) => (
+                <span key={`resource-${index}`} className="text-small">
+                  <Link href={link.href}>{link.title}</Link>
+                </span>
+              ))}
             </nav>
           </div>
 
