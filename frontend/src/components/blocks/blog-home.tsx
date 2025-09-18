@@ -138,7 +138,7 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
             href={`/${latestBlog.slug}`}
             className="no-underline text-neutral-900 dark:text-neutral-100 w-full flex flex-col md:flex-row gap-2xl md:items-center"
           >
-            <div className="h-80 relative rounded-md aspect-video overflow-hidden">
+            <div className="h-80 relative rounded-md aspect-video overflow-hidden w-full lg:max-w-192">
               <Image
                 src={latestBlog.cover_link}
                 alt="Cover image"
@@ -194,13 +194,17 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
               >
                 <section>
                   <div className="flex flex-col gap-md">
-                    <div className="w-full h-64 relative rounded-md aspect-video overflow-hidden">
+                    <div
+                      className="w-full relative rounded-md aspect-video overflow-hidden"
+                      style={{ maxWidth: '100%' }}
+                    >
                       <Image
                         src={blog.cover_link}
                         alt="Cover image"
                         fill
                         style={{ objectFit: 'cover' }}
                         quality={75}
+                        className="!w-full !h-full"
                       />
                     </div>
                     <span className="text-small text-neutral-700 dark:text-neutral-300">
