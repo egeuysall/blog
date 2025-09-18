@@ -1,60 +1,24 @@
-'use client';
-
+// app/blog/[slug]/page.tsx (server component, no 'use client')
 import { notFound } from 'next/navigation';
-import { useEffect, useState, use } from 'react';
 import type { Blog } from '@/types/general';
 import ReactMarkdown from 'react-markdown';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
-const DynamicGroups = ({ params }: { params: Promise<{ slug: string }> }) => {
-  const [data, setData] = useState<Blog>();
-  const [loading, setLoading] = useState(true);
-  const { slug } = use(params);
+export default async function DynamicGroups({ params }: { params: { slug: string } }) {
+  const res = await fetch(`${apiUrl}/${encodeURIComponent(params.slug)}`, {
+    cache: 'no-store',
+  });
 
-  useEffect(() => {
-    if (!slug) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchData = async () => {
-      try {
-        console.log('[DynamicGroups] Fetching:', `${apiUrl}/${encodeURIComponent(slug)}`);
-
-        const res = await fetch(`${apiUrl}/${encodeURIComponent(slug)}`, {
-          cache: 'no-store',
-        });
-
-        console.log('[DynamicGroups] Response status:', res.status, res.statusText);
-
-        if (!res.ok) {
-          return notFound();
-        }
-
-        const json = await res.json();
-        console.log('[DynamicGroups] Received JSON:', json);
-        setData(json.data);
-      } catch (error) {
-        console.error('Error fetching blog post:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [slug]);
-
-  if (loading) {
-    return (
-      <main className="w-full flex flex-col gap-lg">
-        <div>Loading...</div>
-      </main>
-    );
+  if (!res.ok) {
+    notFound();
   }
 
+  const json = await res.json();
+  const data: Blog | undefined = json.data;
+
   if (!data) {
-    return notFound();
+    notFound();
   }
 
   return (
@@ -79,12 +43,10 @@ const DynamicGroups = ({ params }: { params: Promise<{ slug: string }> }) => {
             </p>
           </div>
         </section>
-        <section className="flex flex-col gap-md ">
+        <section className="flex flex-col gap-md">
           <ReactMarkdown>{data.content}</ReactMarkdown>
         </section>
       </main>
     </div>
   );
-};
-
-export default DynamicGroups;
+}
