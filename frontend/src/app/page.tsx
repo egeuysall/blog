@@ -17,6 +17,7 @@ import {
 import Link from 'next/link';
 
 const PAGE_SIZE = 9;
+const CACHE_OPTION: RequestCache = 'force-cache';
 
 const Home: React.FC = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -32,16 +33,15 @@ const Home: React.FC = () => {
     const getBlogs = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${apiUrl}?page=${page}&limit=${PAGE_SIZE + 1}`);
-        if (!res.ok) {
-          throw new Error('Failed to fetch blog posts');
-        }
+        const res = await fetch(`${apiUrl}?page=${page}&limit=${PAGE_SIZE + 1}`, {
+          cache: CACHE_OPTION,
+        });
+        if (!res.ok) throw new Error('Failed to fetch blog posts');
+
         const data = await res.json();
         let blogsData: Blog[] = Array.isArray(data) ? data : data.data || [];
 
-        if (blogsData.length > 0) {
-          blogsData = blogsData.slice(1);
-        }
+        if (blogsData.length > 0) blogsData = blogsData.slice(1); // skip latest
 
         setBlogs(blogsData);
 
@@ -54,8 +54,8 @@ const Home: React.FC = () => {
           setTotalPages(page);
         }
       } catch (error) {
-        console.error('Error fetching blogs:', error);
-        toast('Error getting blogs');
+        console.error(error);
+        toast('Error fetching blogs');
       } finally {
         setLoading(false);
       }
@@ -64,14 +64,13 @@ const Home: React.FC = () => {
     getBlogs();
   }, [apiUrl, page]);
 
-  // Fetch latest blog for the hero section
+  // Fetch latest blog (hero)
   useEffect(() => {
     const getLatestBlog = async () => {
       try {
-        const res = await fetch(`${apiUrl}?page=1&limit=1`);
-        if (!res.ok) {
-          throw new Error('Failed to fetch latest blog post');
-        }
+        const res = await fetch(`${apiUrl}?page=1&limit=1`, { cache: CACHE_OPTION });
+        if (!res.ok) throw new Error('Failed to fetch latest blog');
+
         const data = await res.json();
         const latest = Array.isArray(data) ? data[0] : (data.data && data.data[0]) || null;
 
@@ -90,24 +89,23 @@ const Home: React.FC = () => {
           setLatestBlog(null);
         }
       } catch (error) {
-        console.error('Error fetching latest blog:', error);
-        toast('Error getting latest blog');
+        console.error(error);
+        toast('Error fetching latest blog');
       }
     };
 
     getLatestBlog();
   }, [apiUrl]);
 
-  // Helper to generate pagination items (with ellipsis if needed)
+  // Pagination helper
   const renderPaginationItems = () => {
     const items = [];
     const maxPageButtons = 5;
     let startPage = Math.max(1, page - 2);
     const endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
 
-    if (endPage - startPage < maxPageButtons - 1) {
+    if (endPage - startPage < maxPageButtons - 1)
       startPage = Math.max(1, endPage - maxPageButtons + 1);
-    }
 
     if (startPage > 1) {
       items.push(
@@ -117,13 +115,12 @@ const Home: React.FC = () => {
           </PaginationLink>
         </PaginationItem>
       );
-      if (startPage > 2) {
+      if (startPage > 2)
         items.push(
           <PaginationItem key="start-ellipsis">
             <PaginationEllipsis />
           </PaginationItem>
         );
-      }
     }
 
     for (let i = startPage; i <= endPage; i++) {
@@ -137,13 +134,12 @@ const Home: React.FC = () => {
     }
 
     if (endPage < totalPages) {
-      if (endPage < totalPages - 1) {
+      if (endPage < totalPages - 1)
         items.push(
           <PaginationItem key="end-ellipsis">
             <PaginationEllipsis />
           </PaginationItem>
         );
-      }
       items.push(
         <PaginationItem key={totalPages}>
           <PaginationLink isActive={page === totalPages} onClick={() => setPage(totalPages)}>
@@ -159,7 +155,8 @@ const Home: React.FC = () => {
   return (
     <main className="w-full flex flex-col gap-lg">
       <h2>By Ege</h2>
-      {/* Hero section with latest blog */}
+
+      {/* Hero */}
       <section>
         {latestBlog ? (
           <Link
@@ -174,7 +171,7 @@ const Home: React.FC = () => {
               />
             </div>
             <div>
-              <p className="text-small text-neutral-700 dark:text-neutral-300 no-underline">
+              <p className="text-small text-neutral-700 dark:text-neutral-300">
                 Article &bull; {latestBlog.created_at}
               </p>
               <h4>{latestBlog.title}</h4>
@@ -182,13 +179,11 @@ const Home: React.FC = () => {
                 By {latestBlog.created_by}
               </p>
               <div className="mb-md hidden md:block">
-                {latestBlog.tags.map((tag) => {
-                  return (
-                    <Badge className="mr-sm" key={tag}>
-                      {tag}
-                    </Badge>
-                  );
-                })}
+                {latestBlog.tags.map((tag) => (
+                  <Badge key={tag} className="mr-sm">
+                    {tag}
+                  </Badge>
+                ))}
               </div>
               <p className="hidden md:block">
                 {latestBlog.content
@@ -205,9 +200,9 @@ const Home: React.FC = () => {
         )}
       </section>
 
-      {/* Paginated blog list */}
+      {/* Paginated blogs */}
       <section className="w-full flex flex-col gap-lg mt-8">
-        <h3 className="text-h4">Editor&apos;s Picks</h3>
+        <h3 className="text-h4">Editor's Picks</h3>
         {loading ? (
           <div className="text-center py-8">Loading...</div>
         ) : blogs.length === 0 ? (
@@ -217,10 +212,10 @@ const Home: React.FC = () => {
             {blogs.map((blog) => (
               <Link
                 href={blog.slug}
-                className="no-underline text-neutral-900 dark:text-neutral-100"
                 key={blog.id}
+                className="no-underline text-neutral-900 dark:text-neutral-100"
               >
-                <section key={blog.id}>
+                <section>
                   <div className="flex flex-col gap-md">
                     <img
                       src={blog.cover_link}
@@ -253,6 +248,7 @@ const Home: React.FC = () => {
           </div>
         )}
 
+        {/* Pagination */}
         <div className="flex justify-center items-center gap-md mt-4">
           <Pagination>
             <PaginationContent>

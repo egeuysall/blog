@@ -6,7 +6,7 @@ const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 async function fetchAllPosts(): Promise<Blog[]> {
   try {
     const res = await fetch(`${apiUrl}`, {
-      cache: 'no-store',
+      cache: 'force-cache',
     });
 
     if (!res.ok) {
@@ -26,7 +26,9 @@ async function fetchAllPosts(): Promise<Blog[]> {
   }
 }
 
-export const dynamic = 'force-dynamic';
+// ISR: regenerate sitemap every 1 hour
+export const revalidate = 60 * 60;
+export const dynamic = 'auto';
 
 export async function GET() {
   try {
