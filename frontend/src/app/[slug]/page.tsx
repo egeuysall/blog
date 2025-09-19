@@ -3,6 +3,7 @@ import type { Blog } from '@/types/general';
 import { Markdown } from '@/components/blocks/markdown';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
+import Link from 'next/link';
 
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -61,9 +62,12 @@ export default async function BlogPage({ params }: { params: { slug: string } })
             <Separator />
           </div>
         </section>
-        <section className="flex flex-col gap-md">
+        <section className="flex flex-col gap-md mb-md">
           <Markdown>{data.content}</Markdown>
         </section>
+        <Link href="/" className="text-center">
+          Back to Home
+        </Link>
       </main>
     </div>
   );
