@@ -1,4 +1,4 @@
-import { Merriweather, Inter } from 'next/font/google';
+import { DM_Sans, Inter } from 'next/font/google';
 import { JetBrains_Mono } from 'next/font/google';
 
 // Initialize the Inter font
@@ -8,9 +8,9 @@ export const inter = Inter({
 });
 
 // Initialize Geist font (for headings)
-export const merriweather = Merriweather({
+export const dmSans = DM_Sans({
   subsets: ['latin'],
-  variable: '--font-merriweather',
+  variable: '--font-dm-sans',
 });
 
 // Initialize Geist Mono (for code blocks)
