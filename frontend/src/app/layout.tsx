@@ -7,7 +7,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
 // Fonts
-import { inter, dmSans, jetbrainsMono } from '@/lib/fonts';
+import { inter, merriweather, jetbrainsMono } from '@/lib/fonts';
 
 // Internal Components
 import { Footer } from '@/components/blocks/footer';
@@ -257,7 +257,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       lang="en"
       dir="ltr"
       suppressHydrationWarning
-      className={`${inter.variable} ${dmSans.variable} ${jetbrainsMono.variable} pb-18`}
+      className={`${inter.variable} ${merriweather.variable} ${jetbrainsMono.variable} pb-18`}
     >
       <head>
         <script
