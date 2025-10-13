@@ -15,8 +15,7 @@ import (
 )
 
 func main() {
-	// Test: GitHub Actions deployment
-	log.Println("Starting blog server with automated deployment...")
+	log.Println("Starting blog server with automated deployment")
 
 	err := godotenv.Load()
 	if err != nil {
