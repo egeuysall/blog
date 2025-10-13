@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/egeuysall/blog/internal/utils"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/egeuysall/blog/internal/utils"
 
 	"github.com/egeuysall/blog/internal/api"
 	supabase "github.com/egeuysall/blog/internal/supabase"
@@ -14,6 +15,9 @@ import (
 )
 
 func main() {
+	// Test: GitHub Actions deployment
+	log.Println("Starting blog server with automated deployment...")
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading environment")
