@@ -35,7 +35,7 @@ jobs:
           password: ${{ secrets.RESEND_API_KEY }}
           subject: "Deployment Successful - ${{ github.repository }}"
           to: ${{ secrets.NOTIFICATION_EMAIL }}
-          from: deployments@egeuysal.com
+          from: '"Deployments" <deployments@egeuysal.com>'
           body: |
             Deployment successful for ${{ github.repository }}
 
@@ -55,7 +55,7 @@ jobs:
           password: ${{ secrets.RESEND_API_KEY }}
           subject: "Deployment Failed - ${{ github.repository }}"
           to: ${{ secrets.NOTIFICATION_EMAIL }}
-          from: deployments@egeuysal.com
+          from: '"Deployments" <deployments@egeuysal.com>'
           body: |
             Deployment failed for ${{ github.repository }}
 

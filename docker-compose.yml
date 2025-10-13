@@ -1,28 +1,4 @@
-# Docker Compose file for multi-service app:
-# - frontend: Next.js app (port 3000)
-# - backend: Go API server (port 8080)
-# - nginx: reverse proxy (ports 80/443)
-# Volumes persist build artifacts and data. All services share 'app-network'.
-
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    env_file:
-      - ./frontend/.env
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
-    depends_on:
-      - backend
-    volumes:
-      - nextjs_static:/app/.next
-    networks:
-      - app-network
-    restart: unless-stopped
-
   backend:
     build:
       context: ./backend
@@ -49,12 +25,10 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - backend
-      - frontend
     networks:
       - app-network
 
 volumes:
-  nextjs_static:
   go_data:
 
 networks:
