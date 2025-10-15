@@ -41,6 +41,7 @@ export const Footer: React.FC = () => {
 
   // TODO: Fill these
   const resourceLinks: ResourceLink[] = [
+    { title: 'RSS', href: '/rss.xml' },
     { title: 'Blog', href: '/' },
     { title: 'Links', href: 'https://www.link.egeuysal.com' },
   ];

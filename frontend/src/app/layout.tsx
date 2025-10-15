@@ -264,6 +264,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+        <link
+          rel="alternate"
+          type="application/rss+xml"
+          title="RSS Feed for By Ege Blog"
+          href="/rss.xml"
+        />
       </head>
       <body className="w-full h-full flex-center">
         <LayoutWrapper jsonLdData={jsonLd}>
