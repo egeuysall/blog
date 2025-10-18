@@ -24,21 +24,21 @@ export const Default: Story = {
     <Pagination>
       <PaginationContent>
         <PaginationItem>
-          <PaginationPrevious href="#" />
+          <PaginationPrevious onClick={() => console.log('Previous')} />
         </PaginationItem>
 
         <PaginationItem>
-          <PaginationLink href="#">1</PaginationLink>
+          <PaginationLink onClick={() => console.log('Page 1')}>1</PaginationLink>
         </PaginationItem>
 
         <PaginationItem>
-          <PaginationLink href="#" isActive>
+          <PaginationLink onClick={() => console.log('Page 2')} isActive>
             2
           </PaginationLink>
         </PaginationItem>
 
         <PaginationItem>
-          <PaginationLink href="#">3</PaginationLink>
+          <PaginationLink onClick={() => console.log('Page 3')}>3</PaginationLink>
         </PaginationItem>
 
         <PaginationItem>
@@ -46,11 +46,11 @@ export const Default: Story = {
         </PaginationItem>
 
         <PaginationItem>
-          <PaginationLink href="#">8</PaginationLink>
+          <PaginationLink onClick={() => console.log('Page 8')}>8</PaginationLink>
         </PaginationItem>
 
         <PaginationItem>
-          <PaginationNext href="#" />
+          <PaginationNext onClick={() => console.log('Next')} />
         </PaginationItem>
       </PaginationContent>
     </Pagination>

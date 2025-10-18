@@ -31,9 +31,9 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
   initialTotalPages,
 }) => {
   const [blogs, setBlogs] = useState<Blog[]>(initialBlogs);
-  const [latestBlog] = useState<Blog | null>(initialLatestBlog); // Static, never re-fetch
+  const [latestBlog] = useState<Blog | null>(initialLatestBlog);
   const [page, setPage] = useState<number>(1);
-  const [totalPages] = useState<number>(initialTotalPages);
+  const [totalPages, setTotalPages] = useState<number>(initialTotalPages);
   const [loading, setLoading] = useState<boolean>(false);
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
@@ -49,18 +49,19 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
     const getBlogs = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${apiUrl}?page=${page}&limit=${PAGE_SIZE + 1}`, {
+        const res = await fetch(`${apiUrl}?page=${page}&limit=${PAGE_SIZE}`, {
           cache: 'force-cache',
         });
         if (!res.ok) throw new Error('Failed to fetch blog posts');
 
         const data = await res.json();
-        let blogsData: Blog[] = Array.isArray(data) ? data : data.data || [];
-
-        // For page > 1, slice out the latest blog to maintain consistency
-        if (blogsData.length > 0) blogsData = blogsData.slice(1);
+        const blogsData: Blog[] = Array.isArray(data) ? data : data.data || [];
 
         setBlogs(blogsData);
+
+        if (blogsData.length === PAGE_SIZE && page >= totalPages) {
+          setTotalPages(page + 1);
+        }
       } catch (error) {
         console.error(error);
         toast('Error fetching blogs');
@@ -70,7 +71,7 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
     };
 
     getBlogs();
-  }, [apiUrl, page, initialBlogs]);
+  }, [apiUrl, page, initialBlogs, totalPages]);
 
   // Pagination helper
   const renderPaginationItems = () => {

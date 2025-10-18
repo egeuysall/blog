@@ -36,8 +36,10 @@ async function getHomeData() {
     if (data && typeof data.total === 'number') {
       const adjustedTotal = Math.max(0, data.total - 1);
       totalPages = Math.max(1, Math.ceil(adjustedTotal / PAGE_SIZE));
-    } else if (firstPageBlogs.length === PAGE_SIZE) {
-      totalPages = 2;
+    } else {
+      if (allBlogs.length >= PAGE_SIZE + 1) {
+        totalPages = 3;
+      }
     }
 
     return {
