@@ -78,6 +78,7 @@ lib-cov/
 .node_repl_history
 .tern-port
 .vscode-test/
+.DS_Store
 
 # Go binaries and metadata
 *.exe
@@ -87,6 +88,7 @@ lib-cov/
 *.test
 go.work
 go.work.sum
+backend/tmp/
 
 # Env files
 .env
