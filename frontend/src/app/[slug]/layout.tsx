@@ -5,7 +5,7 @@ import '@/styles/blog.css';
 function getShortDescription(text: string, maxLength = 165): string {
   if (!text) return '';
 
-  let cleaned = text
+  const cleaned = text
     .replace(/(\*\*|__)(.*?)\1/g, '$2') // bold
     .replace(/(\*|_)(.*?)\1/g, '$2') // italic
     .replace(/#{1,6}\s/g, '') // headings
