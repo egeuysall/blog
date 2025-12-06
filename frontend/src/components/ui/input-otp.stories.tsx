@@ -1,5 +1,4 @@
 import type { StoryObj } from '@storybook/nextjs-vite';
-import React from 'react';
 import {
   InputOTP,
   InputOTPGroup,

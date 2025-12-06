@@ -67,6 +67,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/rss": "^0.0.32",
     "@vitest/browser": "^4.0.15",
+    "@vitest/browser-playwright": "^4.0.15",
     "@vitest/coverage-v8": "^4.0.15",
     "eslint": "^9.39.1",
     "eslint-config-next": "16.0.7",
