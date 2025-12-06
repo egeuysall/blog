@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
-import * as React from 'react';
 
 import {
   Card,
@@ -33,7 +32,7 @@ export const Default: Story = {
         </CardAction>
       </CardHeader>
       <CardContent>
-        <p className="text-sm leading-relaxed text-muted-foreground">
+        <p className="text-muted-foreground text-sm leading-relaxed">
           You are currently on the Pro plan. Your next payment will be on Aug 1, 2025.
         </p>
       </CardContent>
