@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import Image from 'next/image';
+import { stripMarkdown } from '@/lib/utils';
 
 import type { Blog } from '@/types/general';
 import {
@@ -129,7 +130,7 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
   };
 
   return (
-    <main className="w-full flex flex-col gap-lg">
+    <main className="gap-lg flex w-full flex-col">
       <h2>By Ege</h2>
 
       {/* Hero - Uses pre-rendered latest blog only */}
@@ -137,9 +138,9 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
         {latestBlog ? (
           <Link
             href={`/${latestBlog.slug}`}
-            className="no-underline text-neutral-900 dark:text-neutral-100 w-full flex flex-col md:flex-row gap-2xl md:items-center"
+            className="gap-2xl flex w-full flex-col text-neutral-900 no-underline md:flex-row md:items-center dark:text-neutral-100"
           >
-            <div className="h-80 relative rounded-md aspect-video overflow-hidden w-full lg:max-w-160">
+            <div className="relative aspect-video h-80 w-full overflow-hidden rounded-md lg:max-w-160">
               <Image
                 src={latestBlog.cover_link}
                 alt="Cover image"
@@ -158,7 +159,7 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
                 By {latestBlog.created_by}
               </p>
               <div className="mb-md hidden md:block">
-                {latestBlog.tags.map((tag) => (
+                {latestBlog.tags.map(tag => (
                   <Badge key={tag} className="mr-sm">
                     {tag}
                   </Badge>
@@ -166,38 +167,41 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
               </div>
               <p className="hidden md:block">
                 {latestBlog.content
-                  ? latestBlog.content.split(/\s+/).slice(0, 25).join(' ') +
-                    (latestBlog.content.split(/\s+/).length > 25 ? '...' : '')
+                  ? (() => {
+                      const cleaned = stripMarkdown(latestBlog.content);
+                      const words = cleaned.split(/\s+/);
+                      return words.slice(0, 25).join(' ') + (words.length > 25 ? '...' : '');
+                    })()
                   : ''}
               </p>
             </div>
           </Link>
         ) : (
-          <div className="w-full flex justify-center items-center py-16">
+          <div className="flex w-full items-center justify-center py-16">
             <span>No latest blog found.</span>
           </div>
         )}
       </section>
 
       {/* Paginated blogs */}
-      <section className="w-full flex flex-col gap-lg mt-8">
+      <section className="gap-lg mt-8 flex w-full flex-col">
         <h3 className="text-h4">Editor&apos;s Picks</h3>
         {loading ? (
-          <div className="text-center py-8">Loading...</div>
+          <div className="py-8 text-center">Loading...</div>
         ) : blogs.length === 0 ? (
-          <div className="text-center py-8">No blog posts found.</div>
+          <div className="py-8 text-center">No blog posts found.</div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-lg">
-            {blogs.map((blog) => (
+          <div className="gap-lg grid md:grid-cols-2 lg:grid-cols-3">
+            {blogs.map(blog => (
               <Link
                 href={blog.slug}
                 key={blog.id}
-                className="no-underline text-neutral-900 dark:text-neutral-100"
+                className="text-neutral-900 no-underline dark:text-neutral-100"
               >
                 <section>
-                  <div className="flex flex-col gap-md">
+                  <div className="gap-md flex flex-col">
                     <div
-                      className="w-full relative rounded-md aspect-video overflow-hidden"
+                      className="relative aspect-video w-full overflow-hidden rounded-md"
                       style={{ maxWidth: '100%' }}
                     >
                       <Image
@@ -206,7 +210,7 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
                         fill
                         style={{ objectFit: 'cover' }}
                         quality={75}
-                        className="!w-full !h-full"
+                        className="!h-full !w-full"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 50vw"
                       />
                     </div>
@@ -220,11 +224,11 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
                     </span>
                   </div>
                   <p className="font-semibold">{blog.title}</p>
-                  <p className="text-small text-neutral-700 dark:text-neutral-300 mb-sm">
+                  <p className="text-small mb-sm text-neutral-700 dark:text-neutral-300">
                     By {blog.created_by}
                   </p>
                   <div>
-                    {blog.tags.map((tag) => (
+                    {blog.tags.map(tag => (
                       <Badge key={tag} className="mr-sm">
                         {tag}
                       </Badge>
@@ -238,7 +242,7 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-center items-center gap-md mt-4">
+          <div className="gap-md mt-4 flex items-center justify-center">
             <Pagination>
               <PaginationContent>
                 <PaginationItem>

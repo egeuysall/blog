@@ -1,23 +1,12 @@
 import type { Metadata } from 'next';
 import React from 'react';
 import '@/styles/blog.css';
+import { stripMarkdown } from '@/lib/utils';
 
 function getShortDescription(text: string, maxLength = 165): string {
   if (!text) return '';
 
-  const cleaned = text
-    .replace(/(\*\*|__)(.*?)\1/g, '$2') // bold
-    .replace(/(\*|_)(.*?)\1/g, '$2') // italic
-    .replace(/#{1,6}\s/g, '') // headings
-    .replace(/!\[.*?\]\(.*?\)/g, '') // images
-    .replace(/\[(.*?)\]\(.*?\)/g, '$1') // links
-    .replace(/`{1,3}[^`\n]+`{1,3}/g, '') // inline code
-    .replace(/^>\s/gm, '') // blockquotes
-    .replace(/^[-*+]\s/gm, '') // unordered lists
-    .replace(/^\d+\.\s/gm, '') // ordered lists
-    .replace(/~~(.*?)~~/g, '$1') // strikethrough
-    .replace(/\n+/g, ' ') // newlines to spaces
-    .trim();
+  const cleaned = stripMarkdown(text);
 
   if (cleaned.length <= maxLength) return cleaned;
   const trimmed = cleaned.slice(0, maxLength);
