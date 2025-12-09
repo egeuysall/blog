@@ -5,12 +5,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-/**
- * Strips Markdown formatting characters from text
- * Removes: headers (#), bold (**), italic (*/_), links, images, code blocks, lists, etc.
- * @param markdown - The markdown string to strip
- * @returns Plain text without markdown formatting
- */
 export function stripMarkdown(markdown: string): string {
   if (!markdown) return ""
 
