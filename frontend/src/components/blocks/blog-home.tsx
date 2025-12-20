@@ -152,7 +152,7 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
             </div>
             <div>
               <p className="text-small text-neutral-700 dark:text-neutral-300">
-                Article &bull; {latestBlog.created_at}
+                Article &middot; {latestBlog.created_at}
               </p>
               <h4>{latestBlog.title}</h4>
               <p className="mb-md text-small text-neutral-700 dark:text-neutral-300">
@@ -215,7 +215,7 @@ export const BlogHome: React.FC<BlogHomeProps> = ({
                       />
                     </div>
                     <span className="text-small text-neutral-700 dark:text-neutral-300">
-                      Article &bull;{' '}
+                      Article &middot;{' '}
                       {new Date(blog.created_at).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'short',
