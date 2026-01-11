@@ -4,13 +4,15 @@ import remarkGfm from 'remark-gfm';
 
 interface MarkdownProps {
   children: string;
+  className?: string;
 }
 
-export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
+export const Markdown: React.FC<MarkdownProps> = ({ children, className }) => {
   return (
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      components={{
+    <div className={className}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
         img: (props) => {
           const src = typeof props.src === 'string' ? props.src : '';
           const alt = props.alt ? String(props.alt) : '';
@@ -29,7 +31,8 @@ export const Markdown: React.FC<MarkdownProps> = ({ children }) => {
         },
       }}
     >
-      {children}
-    </ReactMarkdown>
+        {children}
+      </ReactMarkdown>
+    </div>
   );
 };

@@ -16,7 +16,7 @@ export async function generateStaticParams() {
   const json = await res.json();
   const posts: Blog[] = json.data || [];
 
-  return posts.map(post => ({
+  return posts.map((post) => ({
     slug: post.slug,
   }));
 }
@@ -36,9 +36,9 @@ export default async function BlogPage({ params }: { params: { slug: string } })
 
   return (
     <div className="flex w-full justify-center">
-      <main className="gap-2xl flex w-full max-w-full flex-col md:max-w-3/4 lg:max-w-2/3 xl:max-w-1/2">
+      <main className="gap-lg flex w-full max-w-none flex-col md:max-w-3/4 lg:max-w-2/3 xl:max-w-1/3">
         <section>
-          <Link href="/" className="gap-2xs flex items-center">
+          <Link href="/" className="gap-2xs flex items-center text-small">
             <ArrowLeft size={18} />
             Back to Home
           </Link>
@@ -56,21 +56,23 @@ export default async function BlogPage({ params }: { params: { slug: string } })
             />
           </div>
           <div>
-            <h2>{data.title}</h2>
-            <p className="text-small mb-md text-neutral-700 dark:text-neutral-300">
+            <h4>{data.title}</h4>
+            <p className="text-small! mb-md text-neutral-700 dark:text-neutral-300">
               {data.created_at
                 ? `${new Date(data.created_at).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'short',
                     day: 'numeric',
-                  })} • By ${data.created_by}`
+                  })} · By ${data.created_by}`
                 : ''}
             </p>
             <Separator />
           </div>
         </section>
         <section className="gap-md flex flex-col">
-          <Markdown>{data.content}</Markdown>
+          <Markdown className="prose prose-neutral text-small dark:prose-invert max-w-none!">
+            {data.content}
+          </Markdown>
         </section>
       </main>
     </div>
