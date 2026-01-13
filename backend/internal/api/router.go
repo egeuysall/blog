@@ -28,7 +28,7 @@ func Router() *chi.Mux {
 
 	// Public routes
 	r.Get("/", HandleRoot)
-	r.Get("/ping", HandlePing)
+	r.Get("/health", HandlePing)
 
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/blogs", handlers.HandleGetPaginatedBlogs)
@@ -54,7 +54,7 @@ func HandleRoot(w http.ResponseWriter, r *http.Request) {
 		"status":  "Healthy",
 		"endpoints": map[string]string{
 			"root":      "/",
-			"ping":      "/ping",
+			"health":    "/health",
 			"get_blogs": "/v1/blogs",
 			"get_blog":  "/v1/blogs/{slug}",
 			"create":    "/v1/blogs",
