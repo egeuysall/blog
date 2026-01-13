@@ -1,42 +1,8 @@
-// Package api provides the HTTP router for the backend service.
-//
-// This file defines the Router function, which sets up the main HTTP routes and middleware
-// for the application using the chi router. It includes both public and protected API endpoints,
-// and applies global middleware for security, performance, and request handling.
-//
-// # Middleware
-//
-// The following middleware are applied globally to all routes:
-//   - Recoverer: Recovers from panics and returns a 500 error.
-//   - RealIP: Sets the RemoteAddr to the client's real IP address.
-//   - Timeout: Sets a 3-second timeout for all requests.
-//   - NoCache: Adds headers to prevent client-side caching.
-//   - Compress: Enables response compression with a compression level of 5.
-//   - httprate.LimitByIP: Limits each IP to 30 requests per minute.
-//   - appmid.SetContentType: Sets the Content-Type header for responses.
-//   - appmid.Cors: Handles Cross-Origin Resource Sharing (CORS) settings.
-//
-// # Routes
-//
-// Public routes (no authentication required):
-//   - GET /         : Handled by handlers.HandleRoot
-//   - GET /ping     : Handled by handlers.HandlePing
-//
-// Protected routes (authentication required):
-//   - All routes under /v1 require a valid authentication token via appmid.RequireAuth().
-//
-// # Usage
-//
-// Import this package and call api.Router() to obtain the configured *chi.Mux router
-// for use in your HTTP server.
-//
-// Example:
-//
-//	router := api.Router()
-//	http.ListenAndServe(":8080", router)
 package api
 
 import (
+	"encoding/json"
+	"net/http"
 	"time"
 
 	"github.com/egeuysall/blog/internal/handlers"
@@ -46,13 +12,9 @@ import (
 	"github.com/go-chi/httprate"
 )
 
-// Router sets up the HTTP routes and middleware for the backend API.
-//
-// Returns a *chi.Mux router with all routes and middleware configured.
 func Router() *chi.Mux {
 	r := chi.NewRouter()
 
-	// Global middleware
 	r.Use(
 		middleware.Recoverer,
 		middleware.RealIP,
@@ -65,8 +27,8 @@ func Router() *chi.Mux {
 	)
 
 	// Public routes
-	r.Get("/", handlers.HandleRoot)
-	r.Get("/ping", handlers.HandlePing)
+	r.Get("/", HandleRoot)
+	r.Get("/ping", HandlePing)
 
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/blogs", handlers.HandleGetPaginatedBlogs)
@@ -81,4 +43,41 @@ func Router() *chi.Mux {
 	})
 
 	return r
+}
+
+func HandleRoot(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	response := map[string]any{
+		"service": "Blog API",
+		"version": "1.0.0",
+		"status":  "Healthy",
+		"endpoints": map[string]string{
+			"root":      "/",
+			"ping":      "/ping",
+			"get_blogs": "/v1/blogs",
+			"get_blog":  "/v1/blogs/{slug}",
+			"create":    "/v1/blogs",
+		},
+		"documentation": "https://github.com/egeuysall/blog",
+	}
+
+	json.NewEncoder(w).Encode(response)
+}
+
+func HandlePing(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	response := map[string]any{
+		"status":  "Healthy",
+		"service": "Blog API",
+		"version": "1.0.0",
+		"uptime":  "operational",
+		"checks": map[string]string{
+			"database": "connected",
+			"api":      "responding",
+		},
+	}
+
+	json.NewEncoder(w).Encode(response)
 }
