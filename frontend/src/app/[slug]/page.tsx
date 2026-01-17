@@ -70,7 +70,7 @@ export default async function BlogPage({ params }: { params: { slug: string } })
           </div>
         </section>
         <section className="gap-md flex flex-col">
-          <Markdown className="prose prose-neutral text-small dark:prose-invert max-w-none!">
+          <Markdown className="prose prose-neutral text-small dark:prose-invert max-w-none! prose-pre:p-0 prose-pre:m-0 prose-pre:bg-transparent prose-code:p-0 prose-code:bg-transparent prose-code:before:content-none prose-code:after:content-none [&_.contains-task-list]:list-none [&_.contains-task-list]:pl-0 [&_.task-list-item]:list-none [&_.task-list-item]:ml-0 [&_.task-list-item::marker]:content-none">
             {data.content}
           </Markdown>
         </section>

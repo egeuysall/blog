@@ -228,31 +228,6 @@
     @apply w-full h-64 object-cover rounded-md;
   }
 
-  /* Code blocks */
-  pre,
-  code {
-    @apply font-mono;
-    @apply text-small;
-    @apply bg-neutral-300 dark:bg-neutral-700;
-    @apply rounded-md;
-  }
-
-  code {
-    @apply px-2xs;
-    @apply py-3xs;
-  }
-
-  pre {
-    @apply p-md;
-    @apply mb-2xs;
-    @apply overflow-x-auto;
-
-    code {
-      @apply p-0;
-      @apply bg-transparent;
-    }
-  }
-
   /* Form elements */
   input,
   select,

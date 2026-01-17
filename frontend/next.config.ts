@@ -38,6 +38,10 @@ const nextConfig = (phase: string): NextConfig => {
           protocol: 'https',
           hostname: '**.cloudfront.net',
         },
+        {
+          protocol: 'https',
+          hostname: '**',
+        },
       ],
     },
 
