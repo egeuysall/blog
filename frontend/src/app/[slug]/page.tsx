@@ -56,7 +56,7 @@ export default async function BlogPage({ params }: { params: { slug: string } })
             />
           </div>
           <div>
-            <h1 className="prose prose-neutral dark:prose-invert">{data.title}</h1>
+            <h2 className="prose prose-neutral dark:prose-invert">{data.title}</h2>
             <p className="text-small! prose prose-neutral dark:prose-invert mb-md text-neutral-700 dark:text-neutral-300">
               {data.created_at
                 ? `${new Date(data.created_at).toLocaleDateString('en-US', {
