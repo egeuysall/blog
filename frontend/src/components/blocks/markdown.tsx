@@ -89,7 +89,7 @@ export const Markdown: React.FC<MarkdownProps> = ({ children, className }) => {
             if (isInline) {
               return (
                 <code
-                  className="px-2xs! py-3xs! rounded-sm border border-neutral-300 dark:border-neutral-700 text-small font-mono"
+                  className="px-2xs! py-3xs! rounded-sm border border-neutral-300 dark:border-neutral-700 text-small! text-error-500 font-mono"
                   {...props}
                 >
                   {children}
