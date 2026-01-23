@@ -3,11 +3,15 @@ import { BlogHome } from '@/components/blocks/blog-home';
 
 const PAGE_SIZE = 9;
 
-async function getHomeData() {
+async function getHomeData(page: number = 1) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
   try {
-    const res = await fetch(`${apiUrl}?page=1&limit=${PAGE_SIZE + 1}`, {
+    // For page 1: fetch PAGE_SIZE + 1 (extra for hero)
+    // For page > 1: fetch exactly PAGE_SIZE
+    const limit = page === 1 ? PAGE_SIZE + 1 : PAGE_SIZE;
+
+    const res = await fetch(`${apiUrl}?page=${page}&limit=${limit}`, {
       next: { revalidate: 60 },
       cache: 'force-cache',
     });
@@ -16,26 +20,36 @@ async function getHomeData() {
     const data = await res.json();
     const allBlogs: Blog[] = Array.isArray(data) ? data : data.data || [];
 
+    // Only extract "latest blog" when page === 1
     let latestBlog: Blog | null = null;
-    if (allBlogs && allBlogs.length > 0 && allBlogs[0]) {
-      latestBlog = {
-        ...allBlogs[0],
-        created_at: allBlogs[0].created_at
-          ? new Date(allBlogs[0].created_at).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-            })
-          : '',
-      };
-    }
+    let pageBlogs: Blog[] = allBlogs;
 
-    const firstPageBlogs = allBlogs.slice(1);
+    if (page === 1) {
+      if (allBlogs && allBlogs.length > 0 && allBlogs[0]) {
+        latestBlog = {
+          ...allBlogs[0],
+          created_at: allBlogs[0].created_at
+            ? new Date(allBlogs[0].created_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              })
+            : '',
+        };
+      }
+      pageBlogs = allBlogs.slice(1);
+    }
 
     let totalPages = 1;
     if (data && typeof data.total === 'number') {
-      const adjustedTotal = Math.max(0, data.total - 1);
-      totalPages = Math.max(1, Math.ceil(adjustedTotal / PAGE_SIZE));
+      if (page === 1) {
+        // For page 1, subtract 1 for the hero blog
+        const adjustedTotal = Math.max(0, data.total - 1);
+        totalPages = Math.max(1, Math.ceil(adjustedTotal / PAGE_SIZE));
+      } else {
+        // For other pages, use total directly
+        totalPages = Math.max(1, Math.ceil(data.total / PAGE_SIZE));
+      }
     } else {
       if (allBlogs.length >= PAGE_SIZE + 1) {
         totalPages = 3;
@@ -44,7 +58,7 @@ async function getHomeData() {
 
     return {
       initialLatestBlog: latestBlog,
-      initialBlogs: firstPageBlogs,
+      initialBlogs: pageBlogs,
       initialTotalPages: totalPages,
     };
   } catch (error) {
@@ -57,14 +71,24 @@ async function getHomeData() {
   }
 }
 
-const Home = async () => {
-  const { initialLatestBlog, initialBlogs, initialTotalPages } = await getHomeData();
+interface HomeProps {
+  searchParams: Promise<{ page?: string }>;
+}
+
+const Home = async ({ searchParams }: HomeProps) => {
+  const params = await searchParams;
+  const pageParam = params.page;
+  const pageNumber = pageParam ? parseInt(pageParam, 10) : 1;
+  const validPage = !isNaN(pageNumber) && pageNumber >= 1 ? pageNumber : 1;
+
+  const { initialLatestBlog, initialBlogs, initialTotalPages } = await getHomeData(validPage);
 
   return (
     <BlogHome
       initialLatestBlog={initialLatestBlog}
       initialBlogs={initialBlogs}
       initialTotalPages={initialTotalPages}
+      initialPage={validPage}
     />
   );
 };
