@@ -1,38 +1,34 @@
 import { notFound } from 'next/navigation';
-import type { Blog } from '@/types/general';
-import { Markdown } from '@/components/blocks/markdown';
 import Image from 'next/image';
-import { Separator } from '@/components/ui/separator';
-import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+import { Markdown } from '@/components/blocks/markdown';
+import { Separator } from '@/components/ui/separator';
+import { getBlogBySlug, listAllBlogs } from '@/lib/blogs';
 
-// Regenerate page every 1 hour
 export const revalidate = 3600;
 
 export async function generateStaticParams() {
-  const res = await fetch(apiUrl, { cache: 'force-cache' });
-  const json = await res.json();
-  const posts: Blog[] = json.data || [];
+  try {
+    const posts = await listAllBlogs();
 
-  return posts.map((post) => ({
-    slug: post.slug,
-  }));
+    return posts.map((post) => ({
+      slug: post.slug,
+    }));
+  } catch (error) {
+    console.error('Failed to generate static params:', error);
+    return [];
+  }
 }
 
-export default async function BlogPage({ params }: { params: { slug: string } }) {
+export default async function BlogPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const res = await fetch(`${apiUrl}/${encodeURIComponent(slug)}`, {
-    cache: 'force-cache',
-  });
+  const data = await getBlogBySlug(slug);
 
-  if (!res.ok) notFound();
-
-  const json = await res.json();
-  const data: Blog | undefined = json.data;
-
-  if (!data) notFound();
+  if (!data) {
+    notFound();
+  }
 
   return (
     <div className="flex w-full justify-center">
@@ -44,17 +40,19 @@ export default async function BlogPage({ params }: { params: { slug: string } })
           </Link>
         </section>
         <section className="gap-lg flex flex-col">
-          <div className="relative h-64 w-full overflow-hidden rounded-md">
-            <Image
-              src={data.cover_link}
-              alt={data.title}
-              fill
-              style={{ objectFit: 'cover' }}
-              quality={75}
-              priority={true}
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 50vw"
-            />
-          </div>
+          {data.cover_link ? (
+            <div className="relative h-64 w-full overflow-hidden rounded-md">
+              <Image
+                src={data.cover_link}
+                alt={data.title}
+                fill
+                style={{ objectFit: 'cover' }}
+                quality={75}
+                priority={true}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 75vw, 50vw"
+              />
+            </div>
+          ) : null}
           <div>
             <h4>{data.title}</h4>
             <p className="text-small! mb-md text-neutral-700 dark:text-neutral-300">

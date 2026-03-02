@@ -2,20 +2,120 @@
 
 import React, { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
 
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { getSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { NewtonsCradle } from 'ldrs/react';
 import 'ldrs/react/NewtonsCradle.css';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
-const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const AUTHOR_STORAGE_KEY = 'blog-admin-authors';
+const LAST_AUTHOR_STORAGE_KEY = 'blog-admin-last-author';
+const NEW_AUTHOR_OPTION = '__new_author__';
+const TAG_STOP_WORDS = new Set([
+  'a',
+  'an',
+  'and',
+  'at',
+  'by',
+  'for',
+  'from',
+  'in',
+  'into',
+  'of',
+  'on',
+  'or',
+  'the',
+  'to',
+  'with',
+]);
+
+function slugifyTitle(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function buildTagsFromTitle(value: string) {
+  const words = value
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .map((word) => word.trim())
+    .filter((word) => word.length > 2 && !TAG_STOP_WORDS.has(word));
+
+  return Array.from(new Set(words)).slice(0, 4);
+}
+
+function formatTags(tags: string[]) {
+  return tags.join(', ');
+}
+
+function parseTags(input: string) {
+  return Array.from(
+    new Set(
+      input
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter(Boolean)
+    )
+  );
+}
+
+function readStoredAuthors() {
+  if (typeof window === 'undefined') {
+    return { authors: [] as string[], lastAuthor: '' };
+  }
+
+  const savedAuthors = window.localStorage.getItem(AUTHOR_STORAGE_KEY);
+  const lastAuthor = window.localStorage.getItem(LAST_AUTHOR_STORAGE_KEY) ?? '';
+
+  if (!savedAuthors) {
+    return { authors: [], lastAuthor };
+  }
+
+  try {
+    const parsed = JSON.parse(savedAuthors);
+    return {
+      authors: Array.isArray(parsed)
+        ? parsed.filter((author): author is string => typeof author === 'string' && author.trim() !== '')
+        : [],
+      lastAuthor,
+    };
+  } catch {
+    return { authors: [], lastAuthor };
+  }
+}
+
+function persistAuthors(authors: string[], lastAuthor: string) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.setItem(AUTHOR_STORAGE_KEY, JSON.stringify(authors));
+
+  if (lastAuthor) {
+    window.localStorage.setItem(LAST_AUTHOR_STORAGE_KEY, lastAuthor);
+    return;
+  }
+
+  window.localStorage.removeItem(LAST_AUTHOR_STORAGE_KEY);
+}
 
 const AdminPage: React.FC = () => {
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
@@ -27,44 +127,118 @@ const AdminPage: React.FC = () => {
   const [content, setContent] = useState<string>('');
   const [slug, setSlug] = useState<string>('');
   const [tags, setTags] = useState<string[]>([]);
-  const [createdBy, setCreatedBy] = useState<string>('');
   const [coverLink, setCoverLink] = useState<string>('');
 
   const [tagInput, setTagInput] = useState<string>('');
+  const [slugEdited, setSlugEdited] = useState<boolean>(false);
+  const [tagsEdited, setTagsEdited] = useState<boolean>(false);
+
+  const [savedAuthors, setSavedAuthors] = useState<string[]>([]);
+  const [selectedAuthor, setSelectedAuthor] = useState<string>(NEW_AUTHOR_OPTION);
+  const [newAuthorName, setNewAuthorName] = useState<string>('');
+
+  const [supabase] = useState(() => getSupabaseBrowserClient());
+
+  const createdBy =
+    selectedAuthor === NEW_AUTHOR_OPTION ? newAuthorName.trim() : selectedAuthor.trim();
 
   const isLoginValid = email.trim() !== '' && password.trim() !== '';
   const isPostFormValid =
-    title.trim() !== '' && content.trim() !== '' && slug.trim() !== '' && createdBy.trim() !== '';
-
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+    title.trim() !== '' && content.trim() !== '' && slug.trim() !== '' && createdBy !== '';
 
   useEffect(() => {
     const checkAuth = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      setLoggedIn(!!session);
+
+      setLoggedIn(Boolean(session));
       setLoading(false);
     };
+
     checkAuth();
   }, [supabase.auth]);
 
+  useEffect(() => {
+    const loadAuthors = async () => {
+      const { authors, lastAuthor } = readStoredAuthors();
+      setSavedAuthors(authors);
+
+      if (lastAuthor && authors.includes(lastAuthor)) {
+        setSelectedAuthor(lastAuthor);
+        return;
+      }
+
+      if (authors.length > 0 && authors[0]) {
+        setSelectedAuthor(authors[0]);
+      }
+    };
+
+    loadAuthors();
+  }, []);
+
+  const saveAuthor = (authorName: string) => {
+    const normalizedAuthor = authorName.trim();
+
+    if (!normalizedAuthor) {
+      toast('Enter an author name first');
+      return null;
+    }
+
+    const existingAuthor =
+      savedAuthors.find((author) => author.toLowerCase() === normalizedAuthor.toLowerCase()) ??
+      normalizedAuthor;
+
+    const nextAuthors =
+      existingAuthor === normalizedAuthor && !savedAuthors.includes(existingAuthor)
+        ? [...savedAuthors, normalizedAuthor]
+        : savedAuthors;
+
+    setSavedAuthors(nextAuthors);
+    setSelectedAuthor(existingAuthor);
+    setNewAuthorName('');
+    persistAuthors(nextAuthors, existingAuthor);
+
+    return existingAuthor;
+  };
+
+  const handleTitleChange = (value: string) => {
+    setTitle(value);
+
+    if (!slugEdited) {
+      setSlug(slugifyTitle(value));
+    }
+
+    if (!tagsEdited) {
+      const generatedTags = buildTagsFromTitle(value);
+      setTags(generatedTags);
+      setTagInput(formatTags(generatedTags));
+    }
+  };
+
+  const handleSlugChange = (value: string) => {
+    setSlugEdited(true);
+    setSlug(value);
+  };
+
   const handleTagsChange = (input: string) => {
+    setTagsEdited(true);
     setTagInput(input);
+    setTags(parseTags(input));
+  };
 
-    const tagsArray = input
-      .split(',')
-      .map((tag) => tag.trim())
-      .filter((tag) => tag !== '');
+  const handleAuthorSelect = (value: string) => {
+    setSelectedAuthor(value);
 
-    setTags(tagsArray);
+    if (value !== NEW_AUTHOR_OPTION) {
+      persistAuthors(savedAuthors, value);
+    }
   };
 
   const handleLogin = async (e?: FormEvent) => {
-    if (e) e.preventDefault();
+    if (e) {
+      e.preventDefault();
+    }
 
     if (!email || !password) {
       toast('Please enter both email and password');
@@ -95,9 +269,23 @@ const AdminPage: React.FC = () => {
   };
 
   const handleBlogPost = async (e?: FormEvent) => {
-    if (e) e.preventDefault();
+    if (e) {
+      e.preventDefault();
+    }
 
-    if (!title || !content || !slug || !createdBy) {
+    let authorName = createdBy;
+
+    if (selectedAuthor === NEW_AUTHOR_OPTION) {
+      const savedAuthor = saveAuthor(newAuthorName);
+
+      if (!savedAuthor) {
+        return;
+      }
+
+      authorName = savedAuthor;
+    }
+
+    if (!title || !content || !slug || !authorName) {
       toast('Please fill in all required fields');
       return;
     }
@@ -105,43 +293,48 @@ const AdminPage: React.FC = () => {
     try {
       setLoading(true);
 
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      const token = session?.access_token;
       const payload = {
-        title,
+        title: title.trim(),
         content,
-        slug,
+        slug: slug.trim(),
         tags,
-        created_by: createdBy,
+        created_by: authorName,
         cover_link: coverLink,
       };
 
-      const res = await fetch(apiUrl, {
+      const res = await fetch('/api/blogs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token || session?.access_token}`,
         },
         body: JSON.stringify(payload),
       });
 
       if (!res.ok) {
-        throw new Error('Failed to create blog post');
+        const errorResponse = await res.json().catch(() => null);
+        throw new Error(errorResponse?.error || 'Failed to create blog post');
       }
 
+      persistAuthors(
+        savedAuthors.some((author) => author === authorName) ? savedAuthors : [...savedAuthors, authorName],
+        authorName
+      );
+
+      if (!savedAuthors.includes(authorName)) {
+        setSavedAuthors((currentAuthors) => [...currentAuthors, authorName]);
+      }
+
+      setSelectedAuthor(authorName);
       toast('Blog post created successfully!');
 
-      // Reset form
       setTitle('');
       setContent('');
       setSlug('');
       setTags([]);
       setTagInput('');
-      setCreatedBy('');
       setCoverLink('');
+      setSlugEdited(false);
+      setTagsEdited(false);
     } catch (error: unknown) {
       toast(error instanceof Error ? error.message : 'An error occurred');
     } finally {
@@ -219,83 +412,130 @@ const AdminPage: React.FC = () => {
           <p className="text-small">Share your thoughts with a fresh new post.</p>
           <Separator className="my-2" />
         </section>
-        <form onSubmit={handleBlogPost} className="flex flex-col gap-lg">
-          <div className="grid grid-cols-2 gap-lg">
-            <div className="flex flex-col gap-2xs col-span-2 md:col-span-1">
-              <Label htmlFor="title">Post Title</Label>
+
+        <section>
+          <div className="flex flex-col gap-md">
+            <div className="flex flex-col gap-2xs">
+              <Label htmlFor="title">
+                Title <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="title"
-                required
-                placeholder="Enter a catchy and descriptive title"
-                autoFocus
+                type="text"
+                placeholder="Enter blog title"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                required
+                onChange={(e) => handleTitleChange(e.target.value)}
               />
             </div>
-            <div className="flex flex-col gap-2xs col-span-2 md:col-span-1">
-              <Label htmlFor="slug">URL Slug</Label>
+
+            <div className="flex flex-col gap-2xs">
+              <Label htmlFor="slug">
+                Slug <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="slug"
-                required
-                placeholder="post-url-path (use hyphens, no spaces)"
+                type="text"
+                placeholder="my-blog-post"
                 value={slug}
-                onChange={(e) => setSlug(e.target.value)}
-              />
-            </div>
-            <div className="flex flex-col gap-2xs col-span-2 md:col-span-1">
-              <Label htmlFor="author">Author</Label>
-              <Input
-                id="author"
                 required
-                placeholder="Your name or username"
-                value={createdBy}
-                onChange={(e) => setCreatedBy(e.target.value)}
+                onChange={(e) => handleSlugChange(e.target.value)}
               />
+              <p className="text-small text-neutral-600 dark:text-neutral-400">
+                Auto-generated from the title until you edit it manually.
+              </p>
             </div>
-            <div className="flex flex-col gap-2xs col-span-2 md:col-span-1">
-              <Label htmlFor="coverImage">Cover Image URL</Label>
+
+            <div className="flex flex-col gap-2xs">
+              <Label htmlFor="createdBy">
+                Author <span className="text-destructive">*</span>
+              </Label>
+              <Select value={selectedAuthor} onValueChange={handleAuthorSelect}>
+                <SelectTrigger id="createdBy" className="w-full" aria-label="Author">
+                  <SelectValue placeholder="Select an author" />
+                </SelectTrigger>
+                <SelectContent>
+                  {savedAuthors.map((author) => (
+                    <SelectItem key={author} value={author}>
+                      {author}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value={NEW_AUTHOR_OPTION}>Add new author</SelectItem>
+                </SelectContent>
+              </Select>
+              {selectedAuthor === NEW_AUTHOR_OPTION ? (
+                <div className="flex flex-col gap-2xs sm:flex-row sm:items-end">
+                  <div className="flex-1">
+                    <Label htmlFor="newAuthorName">New author name</Label>
+                    <Input
+                      id="newAuthorName"
+                      type="text"
+                      placeholder="Your name"
+                      value={newAuthorName}
+                      onChange={(e) => setNewAuthorName(e.target.value)}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    className="sm:w-fit"
+                    onClick={() => {
+                      saveAuthor(newAuthorName);
+                    }}
+                  >
+                    Save Author
+                  </Button>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="flex flex-col gap-2xs">
+              <Label htmlFor="coverLink">Cover Image URL</Label>
               <Input
-                id="coverImage"
-                placeholder="https://example.com/image.jpg"
+                id="coverLink"
+                type="url"
+                placeholder="https://..."
                 value={coverLink}
                 onChange={(e) => setCoverLink(e.target.value)}
               />
             </div>
-            <div className="flex flex-col gap-2xs col-span-2">
+
+            <div className="flex flex-col gap-2xs">
               <Label htmlFor="tags">Tags</Label>
               <Input
                 id="tags"
-                placeholder="technology, tutorial, coding (separate with commas)"
+                type="text"
+                placeholder="Auto-generated from title, editable as comma-separated values"
                 value={tagInput}
                 onChange={(e) => handleTagsChange(e.target.value)}
               />
-              {tags.length > 0 && (
-                <div className="mt-2xs" role="group" aria-label="Selected tags">
-                  {tags.map((tag, index) => (
-                    <Badge className="mr-2xs" key={index}>
-                      {tag}
-                    </Badge>
+              {tags.length > 0 ? (
+                <div className="flex flex-wrap gap-2xs">
+                  {tags.map((tag) => (
+                    <Badge key={tag}>{tag}</Badge>
                   ))}
                 </div>
-              )}
+              ) : null}
             </div>
 
-            <div className="flex flex-col gap-2xs col-span-2">
-              <Label htmlFor="content">Post Content</Label>
+            <div className="flex flex-col gap-2xs">
+              <Label htmlFor="content">
+                Content <span className="text-destructive">*</span>
+              </Label>
               <Textarea
                 id="content"
-                required
-                placeholder="Write your post content here... (Markdown supported)"
+                placeholder="Write your post in markdown..."
                 value={content}
+                required
+                className="min-h-64 font-mono text-sm"
                 onChange={(e) => setContent(e.target.value)}
-                className="min-h-[200px]"
               />
             </div>
+
+            <Button type="submit" onClick={() => handleBlogPost()} disabled={loading || !isPostFormValid}>
+              {loading ? 'Publishing...' : 'Publish Post'}
+            </Button>
           </div>
-          <Button type="submit" className="col-span-2" disabled={loading || !isPostFormValid}>
-            {loading ? 'Publishing...' : 'Publish Post'}
-          </Button>
-        </form>
+        </section>
       </main>
     </div>
   );
